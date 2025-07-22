@@ -88,13 +88,13 @@ All students track time spent on each task and project activity. This data helps
 
 ## Get Involved
 
-- **Universities and educational institutions** interested in participating can reach out by filling the [interest form](https://wordpressdotorg.survey.fm/wordpress-credits-educational-institution-interest-form).
+- **Universities and educational institutions** interested in participating can reach out by filling the [interest form](https://airtable.com/appIzQKfwTn5dyPVp/shrYvY0CDNIkILIre).
 - **Companies and sponsors** can support the program by:
   - Sponsoring mentors
   - Providing tools or learning resources
   - Offering project-based funding
 
-We invite companies to learn more about how to support the program by [visiting the dedicated page](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/get-involved-wordpress-credits-for-companies/).
+We invite companies to learn more about how to support the program by [visiting the dedicated page](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/get-involved-company-guide/).
 
 ## Why It Matters
 
