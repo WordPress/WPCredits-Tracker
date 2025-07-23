@@ -1,5 +1,7 @@
 # GitHub as a possible tracking system for WP Credits students?
 
+[Original Source](https://docs.google.com/document/d/1glocyFw0ATE4mUmYcx5ckPTdD2dy-f-MKOiCQkBx5Ig/edit?tab=t.0#heading=h.xs627fau743)
+
 Thoughts (Celi): 
 
 GitHub is a collaboration tool, to combine the work of many people in one common project. This is good for WordPress projects, but not the right scenario for a classroom with several students, each of them working on their own project and tasks. 
