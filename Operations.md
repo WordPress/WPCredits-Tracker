@@ -1,5 +1,7 @@
 ## Operational Readiness Checklist for WordPress Credits
 
+[Original source](https://docs.google.com/document/d/1C4JMat-tHZyEEOJp_PdhPVPObJ8Pu6gBwYghudAiH5Q/edit?tab=t.0#heading=h.3cjg8buq290e)
+
 ### 1\. Core Tracking Systems
 
 * Airtable or equivalent CRM set up for universities, students, and mentors  
