@@ -1,5 +1,7 @@
 # Self-Onboarding Checklist
 
+[Original Source](https://docs.google.com/document/d/1SgRVqVav2SWUp-f4YZJisB7_5OIqDeRtPz8RxBNwwV0/edit?tab=t.0#heading=h.a5z7x8xa77tl)
+
 Welcome to WordPress Credits! This checklist will guide your first steps as you get familiar with WordPress, open source collaboration, and your personal contribution journey. Please move through the list at your own pace, checking off items as you complete them.
 
 If you ever feel stuck, have questions, or need support during your internship, please don’t hesitate to reach out. In addition to your mentor, you can always contact Isotta Peira at info@wordpressfoundation.org or find her in the Global WordPress Slack as @peiraisotta. We’re here to help you have a meaningful and successful experience!
