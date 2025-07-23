@@ -1,4 +1,5 @@
 # WP Credits \- Roadmap
+[Original Source](https://docs.google.com/document/d/1RL_QUt0DsfoQNbpBL2rZup09h810FhN0VU0Bw3fTCBg/edit?tab=t.0#heading=h.krqdot1mifk4)
 
 ## Summary Table \- Quarterly Milestones
 
