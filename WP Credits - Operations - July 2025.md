@@ -3,8 +3,8 @@
 Original Source](https://docs.google.com/document/d/1Z-zenWOoba5XeK1uiJQZ9rZDjwvv1lSH4j9B9fTw5RI/edit?tab=t.0#heading=h.tucxvai4g3ik)
 
 - Francesco Di Candia: 4/week   
-- Celi Garoe: X 4/week   
-- Isotta Peira: X 10/week 
+- Celi Garoe: 4/week   
+- Isotta Peira: 10/week 
 
 ### **Next Steps**
 
