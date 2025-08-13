@@ -10,15 +10,15 @@ An innovative internship program by the WordPress Foundation that brings student
 
 ### **Charitable foundation**
 
-Created by Matt Mullenweg, co-founder of WordPress and CEO of Automattic.
+Founded by Matt Mullenweg, co-founder of WordPress, this independent nonprofit stewards the WordPress open-source project for the benefit of all users.
 
 ### Global mission
 
-Democratizing publishing through open-source software.
+Its objective is to democratize publishing and promote equitable access to the web through open-source software.
 
 ### Education and research
 
-Nonprofit organization dedicated to education, research, and open source.
+WPF supports education, research, and community initiatives without discrimination, ensuring global participation and inclusion.
 
 ---
 
