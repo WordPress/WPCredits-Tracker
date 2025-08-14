@@ -2,7 +2,7 @@
 
 ## **A bridge to open-source technology**
 
-An innovative internship program by the WordPress Foundation that brings students into the heart of the WordPress ecosystem so they can gain real-world experience while contributing to a global open-source project.
+An innovative educational contribution program by the WordPress Foundation that brings students into the heart of the WordPress ecosystem so they can gain real-world experience while contributing to a global open-source project.
 
 ---
 
@@ -40,7 +40,7 @@ Average starting salary in the industry.
 
 ---
 
-## **WordPress Credits: Curricular Internships**
+## **WordPress Credits: Curricular Contribution Program**
 
 ### International Experience
 
@@ -267,7 +267,7 @@ Meet professionals and industry leaders from around the world during the event.
 
 Any questions? 
 
-We are available for clarifications or insights on internships WordPress Credits.
+We are available for clarifications or insights on WordPress Credits.
 
 Contact: **internships@wordpressfoundation.org**
 
