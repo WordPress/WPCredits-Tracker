@@ -34,10 +34,6 @@ Use WordPress, including Rolling Stone and Nasa.
 
 With active WordPress communities.
 
-### 30K Euros
-
-Average starting salary in the industry. 
-
 ---
 
 ## **WordPress Credits: Curricular Contribution Program**
@@ -116,7 +112,7 @@ Develop skills in AI-assisted workflows and open-source project management.
 
 ---
 
-## **Skills Developed**
+## **Transferable Skills**
 
 ### Digital literacy
 
@@ -132,7 +128,7 @@ Ability to interact in international settings
 
 ### Problem solving
 
-Creative solutions in multicultural teams
+Creative solutions in multicultural remote teams
 
 ---
 
@@ -148,7 +144,7 @@ Introduction to the WordPress ecosystem and its global community.
 
 Connection with mentor who will accompany you on your journey.
 
-3. ### Design
+3. ### Project Design
 
 Designing a personal project based on your interests.
 
@@ -196,11 +192,11 @@ Online and offline community management.
 
 Design of loyalty programs.
 
-### Head of partnerships
+### Partnerships manager
 
 Identification of partnership opportunities.
 
-### Programmer
+### Developer
 
 Development of themes, plugins, and custom features.
 
@@ -220,15 +216,15 @@ Planning and coordination of digital projects.
 
 ## **Some of the Key Players in the WordPress Ecosystem**
 
-Automattic (WordPress.com, Woo) 
+Automattic (WordPress.com, Jetpack) 
 
-Google 
+hosting.com 
 
-PayPal
+Bluehost
 
-Elementor 
+Woo 
 
-Bluehost 
+Kinsta 
 
 Weglot
 
@@ -238,11 +234,11 @@ Weglot
 
 ### Exclusive Scholarship 
 
-Opportunities for the most outstanding trainees to participate in the next WordCamp Europe.
+Opportunities for the most outstanding students to participate in the next Flagship WordCamps in Europe, Asia, and US.
 
 ### Share your experience
 
-Get on stage and tell your journey in front of an audience of more than 2,000 people.
+Get on stage and tell your journey in front of an audience of more than 1,000 people.
 
 ### International Networking 
 
