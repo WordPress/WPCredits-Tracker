@@ -236,7 +236,7 @@ Weglot
 
 Opportunities for the most outstanding students to participate in the next Flagship WordCamps in Europe, Asia, and US.
 
-### Share your experience
+### Global Visibility
 
 Get on stage and tell your journey in front of an audience of more than 1,000 people.
 
