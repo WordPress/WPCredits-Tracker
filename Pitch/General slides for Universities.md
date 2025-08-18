@@ -34,6 +34,10 @@ Use WordPress, including Rolling Stone and Nasa.
 
 With active WordPress communities.
 
+### Institutional Excellence
+
+Offer an exclusive program that reinforces your standing as a leader in higher education.
+
 ---
 
 ## **WordPress Credits: Curricular Contribution Program**
