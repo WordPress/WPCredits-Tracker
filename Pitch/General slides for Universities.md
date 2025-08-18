@@ -250,7 +250,7 @@ Meet professionals and industry leaders from around the world during the event.
 
 ---
 
-## **How to Join as a University**
+## **Join the Program**
 
 * Open to students from all fields of study  
 * Flexible and aligned with academic requirements  
