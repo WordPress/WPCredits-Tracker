@@ -6,3 +6,4 @@ Here’s a suggested (but not exhaustive) list of tools we could ask sponsors to
 * Domains
 * Hosting
 * Licenses (Plugin - Themes)
+* Supporting Mentors
