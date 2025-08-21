@@ -4,3 +4,7 @@
 | `Yoast` | Plugin | Access to Yoast Premium + Yoast Academy | The student will have instructions | www.yoast.com |
 | `WordPress.com` | Hosting | Domain + 1 year of free hosting + 50% off renewal | More information needed | www.wordpress.com|
 | `OceanWP LLC` | Plugin + Theme | Licences for 1 year | The student will have instructions | www.oceanwp.com |
+| `Elicus` | Services | - | The student will have instructions | www.elicus.com |
+| `TorontoDigits` | Services | - | The student will have instructions | www.torontodigits.com |
+| `ColoredCow Consulting` | Services | - | The student will have instructions | www.coloredcow.com |
+| `Edutech Club` | Services | - | The student will have instructions | www.edutechclub.africa |
