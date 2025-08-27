@@ -1,0 +1,4 @@
+- English: https://gamma.app/docs/WordPress-Credits-2ul3dmv61tpover?mode=doc 
+- Spanish:
+- Polish:
+- Italian: 
