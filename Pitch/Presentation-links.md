@@ -1,4 +1,4 @@
 - English: https://gamma.app/docs/WordPress-Credits-2ul3dmv61tpover?mode=doc 
-- Spanish:
-- Polish:
-- Italian: 
+- Spanish: https://gamma.app/docs/WordPress-Credits-Spanish-cyr2ov6rm9klmfl?mode=doc
+- Polish: https://gamma.app/docs/WordPress-Credits-Polish-wu597fg4s7roqov?mode=doc
+- Italian: https://gamma.app/docs/WordPress-Credits-Italian-9em869najhy79ap?mode=doc
