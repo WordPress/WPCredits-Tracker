@@ -25,11 +25,11 @@ All official communication for this project must occur exclusively on the offici
 To ensure the project runs smoothly and does not get delayed, you are expected to adhere to the following protocols:
 
 ### 3.1 Daily Check-In
-You are required to check your Slack messages and the #wpcredits channel at least once every 24 hours. This is crucial for staying updated on tasks, feedback, and announcements.
+You are required to check your Slack messages and the #wpcredits channel at least once every 24 hours on working days. This is crucial for staying updated on tasks, feedback, and announcements.
 
 ### 3.2 Prompt Responses
 While we understand you have other commitments, you must respond to direct messages (DMs) and mentions in channels in a timely manner.
-- **Goal:** A response within 24 hours is mandatory, even if it is just to acknowledge receipt of a message and provide a timeframe for a more detailed reply (e.g., "Thanks, I've seen this. I will look into it and get back to you by tomorrow").
+- **Goal:** A response within 24 hours during working days is mandatory, even if it is just to acknowledge receipt of a message and provide a timeframe for a more detailed reply (e.g., "Thanks, I've seen this. I will look into it and get back to you by tomorrow").
 - **Why this matters:** Unanswered messages block progress, create uncertainty, and can delay the entire project timeline. Your proactive communication is key to your success and the success of your team.
 
 ## 3.3 Your Mentor
@@ -42,6 +42,6 @@ Please read it carefully here: https://make.wordpress.org/handbook/community-cod
 It is essential that all interactions are respectful, inclusive, and professional.
 
 ## 5.0 What to do if you encounter problems
-If you face any technical issues accessing Slack, have questions about the project's scope, or have personal commitments that will affect your availability, you must inform your mentor or project coordinator immediately via a Slack DM. Proactive communication about challenges is a sign of professionalism.
+If you face any technical issues accessing Slack, have questions about the project's scope, or have personal commitments that will affect your availability, you must inform your mentor or project coordinator immediately via a Slack DM or email. Proactive communication about challenges is a sign of professionalism.
 
 We are excited to have you on board and look forward to seeing your contributions to the WordPress project! Let's build something amazing together.
