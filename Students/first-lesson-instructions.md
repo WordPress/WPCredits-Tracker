@@ -14,7 +14,7 @@ All official communication for this project must occur exclusively on the offici
 - It ensures your mentor and the project coordinators can easily assist you.
 
 ### 2.2 How to Access the WordPress Slack Workspace
-- **Visit the official registration page:** Go to chat.wordpress.org.
+- **Visit the official registration page:** Go to https://chat.wordpress.org
 - **Enter your email address:** Use a valid and frequently checked email address.
 - **Check your inbox:** You will receive an invitation to join the workspace.
 - **Create your account:** Follow the instructions in the email to set up your Slack account. We recommend using your real name as your display name for easy identification.
@@ -29,8 +29,8 @@ You are required to check your Slack messages and the #wpcredits channel at leas
 
 ### 3.2 Prompt Responses
 While we understand you have other commitments, you must respond to direct messages (DMs) and mentions in channels in a timely manner.
-**Goal:** A response within 24 hours is mandatory, even if it is just to acknowledge receipt of a message and provide a timeframe for a more detailed reply (e.g., "Thanks, I've seen this. I will look into it and get back to you by tomorrow").
-**Why this matters:** Unanswered messages block progress, create uncertainty, and can delay the entire project timeline. Your proactive communication is key to your success and the success of your team.
+- **Goal:** A response within 24 hours is mandatory, even if it is just to acknowledge receipt of a message and provide a timeframe for a more detailed reply (e.g., "Thanks, I've seen this. I will look into it and get back to you by tomorrow").
+- **Why this matters:** Unanswered messages block progress, create uncertainty, and can delay the entire project timeline. Your proactive communication is key to your success and the success of your team.
 
 ## 3.3 Your Mentor
 Your assigned mentor will be announced once the project officially begins. They will introduce themselves to you via a call and the via Slack.
