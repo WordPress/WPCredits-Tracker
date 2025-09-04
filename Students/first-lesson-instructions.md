@@ -33,7 +33,7 @@ While we understand you have other commitments, you must respond to direct messa
 - **Why this matters:** Unanswered messages block progress, create uncertainty, and can delay the entire project timeline. Your proactive communication is key to your success and the success of your team.
 
 ## 3.3 Your Mentor
-Your assigned mentor will be announced once the project officially begins. They will introduce themselves to you via a call and the via Slack.
+Your assigned mentor will be announced once the project officially begins. They will introduce themselves to you via a call and then via Slack.
 Your mentor will be your primary point of contact for all questions related to your tasks and guidance.
 
 ## 4.0 Code of Conduct
