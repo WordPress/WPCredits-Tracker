@@ -14,7 +14,7 @@ All official communication for this project must occur exclusively on the offici
 - It ensures your mentor and the project coordinators can easily assist you.
 
 ### 2.2 How to Access the WordPress Slack Workspace
-- Step by step instruction to access Slack will be found in the lesson: **Join global and local Slack**.
+- Step by step instructions to access Slack will be found in the lesson: **Join global and local Slack**.
 
 ## 3.0 Your Communication Responsibilities
 To ensure the project runs smoothly and does not get delayed, you are expected to adhere to the following protocols:
