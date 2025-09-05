@@ -32,7 +32,7 @@ While we understand you have other commitments, you must respond to direct messa
 - **Goal:** A response within 24 hours during working days is mandatory, even if it is just to acknowledge receipt of a message and provide a timeframe for a more detailed reply (e.g., "Thanks, I've seen this. I will look into it and get back to you by tomorrow").
 - **Why this matters:** Unanswered messages block progress, create uncertainty, and can delay the entire project timeline. Your proactive communication is key to your success and the success of your team.
 
-## 3.3 Your Mentor
+### 3.3 Your Mentor
 Your assigned mentor will be announced once the project officially begins. They will introduce themselves to you via a call and then via Slack.
 Your mentor will be your primary point of contact for all questions related to your tasks and guidance.
 
