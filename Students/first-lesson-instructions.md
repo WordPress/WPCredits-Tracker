@@ -14,12 +14,7 @@ All official communication for this project must occur exclusively on the offici
 - It ensures your mentor and the project coordinators can easily assist you.
 
 ### 2.2 How to Access the WordPress Slack Workspace
-- **Visit the official registration page:** Go to https://chat.wordpress.org
-- **Enter your email address:** Use a valid and frequently checked email address.
-- **Check your inbox:** You will receive an invitation to join the workspace.
-- **Create your account:** Follow the instructions in the email to set up your Slack account. We recommend using your real name as your display name for easy identification.
-- **Log in:** Once your account is created, you can access the workspace at any time by visiting wordpress.slack.com or using the Slack desktop or mobile app.
-- **Join our project channel:** Once logged in, join the dedicated channel for our project: #wpcredits. This will be your main hub for announcements and discussions.
+- Step by step instruction to access Slack will be found in the lesson: **Join global and local Slack**.
 
 ## 3.0 Your Communication Responsibilities
 To ensure the project runs smoothly and does not get delayed, you are expected to adhere to the following protocols:
