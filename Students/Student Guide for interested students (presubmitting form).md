@@ -42,7 +42,7 @@ By the end of the program, you will:
 
 ## **Next Steps**
 
-1. **Apply** through your university or the application form.  
+1. **Apply** using the [application form](anchor to the button below) at the end of this page.  
 2. Once selected, you’ll receive an agreement and instructions to set up your student account.  
 3. Attend the onboarding session and meet your mentor.  
 4. Start contributing and building your project\!
