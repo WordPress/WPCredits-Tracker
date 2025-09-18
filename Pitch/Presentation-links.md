@@ -2,3 +2,4 @@
 - Spanish: https://gamma.app/docs/WordPress-Credits-Spanish-cyr2ov6rm9klmfl?mode=doc
 - Polish: https://gamma.app/docs/WordPress-Credits-Polish-wu597fg4s7roqov?mode=doc
 - Italian: https://gamma.app/docs/WordPress-Credits-Italian-9em869najhy79ap?mode=doc
+- Bengali: https://gamma.app/docs/WordPress-Credits-Bengali-5v71d76zldhrjwf
