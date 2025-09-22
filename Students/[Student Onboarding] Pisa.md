@@ -26,4 +26,6 @@ In all cases, the email has been condition to be sent only when **Pisa Universit
 
 1. When the student's 'Status' column is **Confirmed**, we recieve an email from Airtable advising to assign a Mentor in the student's 'Mentor' column.
 2. We will assign that message to Francesco (we can change this) and he will take care of assigning the Mentor to the Student with his knowledge of Italian Mentors status/preferences. 
-3. When the student's 'Status' column is **Active** + **'Mentor' column is not emtpy**, Airtable sends the welcome email with the mentor in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference). 
+3. When the student's 'Status' column is **Active** + **'Mentor' column is not emtpy**, Airtable sends the welcome email with the mentor in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference).
+
+HELLO
