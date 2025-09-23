@@ -7,7 +7,7 @@ In all cases, the email has been condition to be sent only when **Pisa Universit
 
 1. The student fill up the form and indicate **'Pisa University'** as their institution.
 2. 'Status' column need to be **empty** at this point.
-3. Airtable sends an email to asking the student to book a meeting with Isotta (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3932399) as reference). _Maybe we need to have some kind of email to one of us too about this?_ 
+3. Airtable sends an email to asking the student to book a meeting with Isotta (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3932399) as reference). _Maybe we need to have some kind of email to one of us too about this?_ *We can add a internships@wordpressfoundation.org in copy so we receive an email, but is this necessary or is it going to add more innecesary work on our side?*
 
 ## Step 2: After the Individual Meeting with Isotta
 
@@ -18,7 +18,7 @@ In all cases, the email has been condition to be sent only when **Pisa Universit
 
 1. Students provide all needed information.
 2. Isotta prepares the agreement and ask the Student to sign it.
-3. **When agreement is signed**, Isotta applies the status **Confirmed** to the student's 'Status' column. _here we need how to know that the agreement is signed_
+3. **When agreement is signed**, Isotta applies the status **Confirmed** to the student's 'Status' column. _here we need how to know that the agreement is signed_ *As I understood from what Issota showed us, the student has to send her the signed agreement, so this is how she knows. Isotta?*
 4. Isotta completes the process in the University portal until the status of the agreement is AT (final acceptance).
 5. Isotta assigns the status **Active** to the student's 'Status' column.
 
