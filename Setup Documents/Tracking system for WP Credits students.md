@@ -4,7 +4,7 @@
 
 Thoughts (Celi): 
 
-GitHub is a collaboration tool, to combine the work of many people in one common project. This is good for WordPress projects, but not the right scenario for a classroom with several students, each of them working on their own project and tasks. 
+GitHub is a collaboration tool that combines the work of many people in one common project. This is good for WordPress projects, but not the right scenario for a classroom with several students, each of them working on their own project and tasks. 
 
 The only option that looks promising for tracking student progress in GitHub in my opinion is the option 1, GitHub classroom, but it has a major downside regarding how mentors can access the classroom (being owners in the GitHub organization?). 
 
@@ -19,7 +19,7 @@ The only option that looks promising for tracking student progress in GitHub in 
 ### Highlights and pros: 
 
 * You can create 1 classroom per University/year/etc.   
-* You can add manually the list of students to each classroom.  
+* You can manually add the list of students to each classroom.  
 * You can create individual assignments just once and then replicate them in other classrooms with one click.   
 * To get the student enrolled in their assignments, you share with them a link per each assignment. 
 
@@ -29,14 +29,14 @@ The only option that looks promising for tracking student progress in GitHub in 
 * I am not sure, but it looks like all teachers need to be owners in the GitHub organization to be mentors/admin in the classroom. This could be a real problem.  
 * But there is the possibility to create a new organization (it could be called WP Credits) and have there only the repositories needed for this project, and give mentors ownership in that organization. Could this be an option?![][image1]
 
-* I think it would be good to have a repository per each task/assigment we create. When creating a task (assignment), you assign a repository template to it that gets created and forked when the student enrolled on it. This means each student gets their own copy of the repository. Also a pull request is created in the moment that assignment is accepted by the students. That is the place to discuss with the mentor about the assignment, and where they can do changes to the files and ask for a revision. But this means creating several repositories, we will need admin access to the organization. ![][image2]  
+* I think it would be good to have a repository for each task/assignment we create. When creating a task (assignment), you assign a repository template to it that gets created and forked when the student enrolls in it. This means each student gets their own copy of the repository. Also a pull request is created at the moment that assignment is accepted by the students. That is the place to discuss with the mentor about the assignment, and where they can make changes to the files and ask for a revision. But this means creating several repositories, and we will need admin access to the organization. ![][image2]  
 * ![][image3]
 
 ## **Option 2: Repository \+ branch creation per every student**
 
 * Each student would have to create a new branch and modify the documents we create in the repository (one document per task, more or less), and create a pull request to modify the documents with their progress.   
-* This could be messy (we would need to control very well that they can create a branch but not commit an close a pull request).   
-* If they cannot create a branch without the option of committing, we will have to create the branch for each them so they can work on it.   
+* This could be messy (we would need to control very well that they can create a branch but not commit or close a pull request).   
+* If they cannot create a branch without the option of committing, we will have to create the branch for each of them so they can work on it.   
 * Having so many branches (each pull request creates a new one) could be messy for the mentors and students. 
 
 ## **![][image4]**
