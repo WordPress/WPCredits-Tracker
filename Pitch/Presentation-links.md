@@ -4,3 +4,4 @@
 - Italian: https://gamma.app/docs/WordPress-Credits-Italian-9em869najhy79ap?mode=doc
 - Bengali: https://gamma.app/docs/WordPress-Credits-Bengali-5v71d76zldhrjwf
 - Gujarati: https://gamma.app/docs/WordPress-Credits-Gujarati-4eihw0av46yc20h
+- Malaysian: https://gamma.app/docs/WordPress-Credits-2ul3dmv61tpover
