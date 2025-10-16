@@ -46,4 +46,5 @@ The WordPress Credits Program Team
    - We create a filtered view of the Student Report table for that mentor with a password protected link.
    - We create a 1 time link for the password with https://1ty.me.
    - We add both urls (personal Student Report table and 1ty) to the Mentors table columns 'Student Report personal table' and 'Password for Student Report personal table'
-7. [This welcome email (second tab)](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them. 
+7. [This welcome email (second tab)](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them.
+8. We invite them to the #WP-Credits private channel. 
