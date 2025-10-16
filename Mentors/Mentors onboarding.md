@@ -21,3 +21,25 @@ Best regards,
 The WordPress Credits Program Team
 
 ----
+## Step 2: Vetting
+
+1. Isotta (for now) will vet the mentors aplications and introduce in the Status:
+    - Vetted Positive
+    - Vetted Negative
+    - Needs Second Opinion
+
+## Step 3: Onboarding to 'Vetted Positive' 
+
+### Step 3.1: Invitation to the course 
+
+1. Every week, Celi will look for 'Vetted Positive' and:
+    - Invite them to learn.wordpress.org as subscribers.
+    - Change their Status to 'Course Invitation Email Sent'
+    - [This email](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them. 
+
+### Step 3.2: Course completed - Welcome/Info email
+
+1. When they complete the course, the mentor writes back to internships@wordpressfoundation.org to let us know.
+2. We (Celi/Isotta for now) check if the course is passed in Sensei.
+3. If passed, we change Status column to 'Active'
+4. [This welcome email (second tab)](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them. 
