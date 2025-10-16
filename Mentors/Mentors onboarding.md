@@ -41,5 +41,9 @@ The WordPress Credits Program Team
 
 1. When they complete the course, the mentor writes back to internships@wordpressfoundation.org to let us know.
 2. We (Celi/Isotta for now) check if the course is passed in Sensei.
-3. If passed, we change Status column to 'Active'
-4. [This welcome email (second tab)](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them. 
+3. If passed:
+   - We change Status column to 'Active'.
+   - We create a filtered view of the Student Report table for that mentor with a password protected link.
+   - We create a 1 time link for the password with https://1ty.me.
+   - We add both urls (personal Student Report table and 1ty) to the Mentors table columns 'Student Report personal table' and 'Password for Student Report personal table'
+7. [This welcome email (second tab)](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them. 
