@@ -1,7 +1,7 @@
 # Student Onboarding for Pisa Students
 
 Most steps depend on the status of the student in Airtable 'Students' table, so they are activated when this status changes.
-In all cases, the email has been condition to be sent only when **Pisa University** is the Student's institution. 
+In all cases (EXCEPT the last step), the email has been condition to be sent only when **Pisa University** is the Student's institution. 
 
 ## Step 1: When a Form of Interest is Sent
 
