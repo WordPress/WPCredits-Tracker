@@ -19,11 +19,9 @@ In all cases (EXCEPT the last step), the email has been condition to be sent onl
 1. Students provide all needed information.
 2. Isotta prepares the agreement, sign it, and send it to the student and ask the student to sign it and to complete the signature round (tutor + send to the intership office).
 3. The students needs to confirm Isotta that the intership office has activated the project. 
-4. **When the project has been activated on the intership portal**, Isotta assigns the status **Active** to the student's 'Status' column.
+4. **When the project has been activated on the intership portal**, Isotta assigns the status 
 
 ## Step 4: Mentor Assignment and Welcome Email to the Course 
 
-1. When the student's 'Status' column is **Active**, we receive an email from Airtable advising to assign a Mentor in the student's 'Mentor' column.
-2. We will assign that message to Francesco (we can change this) and he will take care of assigning the Mentor to the Student with his knowledge of Italian Mentors status/preferences.
-3. After assigning the mentor, Francesco will change the status to **In Sensei**.
-4. When the student's 'Status' column is **In Sensei** + **'Mentor' column is not empty**, Airtable sends the welcome email with the mentor and interships@wordpressfundation.org in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference). 
+1. After assigning **In Sensei** to the student's 'Status' column, we need to assign a mentor to the student. 
+2. When the student's 'Status' column is **In Sensei** + **'Mentor' column is not empty**, Airtable sends the welcome email with the mentor and interships@wordpressfundation.org in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference). 
