@@ -1,7 +1,7 @@
 # Student Onboarding for Pisa Students
 
 Most steps depend on the status of the student in Airtable 'Students' table, so they are activated when this status changes.
-In all cases (EXCEPT the last step), the email has been condition to be sent only when **Pisa University** is the Student's institution. 
+In all cases (EXCEPT the last 2 steps, 4th and 5th), the email has been condition to be sent only when **Pisa University** is the Student's institution. 
 
 ## Step 1: When a Form of Interest is Sent
 
@@ -24,4 +24,11 @@ In all cases (EXCEPT the last step), the email has been condition to be sent onl
 ## Step 4: Mentor Assignment and Welcome Email to the Course 
 
 1. After assigning **In Sensei** to the student's 'Status' column, we need to assign a mentor to the student. 
-2. When the student's 'Status' column is **In Sensei** + **'Mentor' column is not empty**, Airtable sends the welcome email with the mentor and interships@wordpressfundation.org in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference). 
+2. When the student's 'Status' column is **In Sensei** + **'Mentor' column is not empty**:
+   -  Airtable sends the welcome email with the mentor and interships@wordpressfundation.org in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference).
+   -  Airtable creates a record for the student in 'Students Reports' and 'Feedback'.
+
+
+## Step 5: Status changes to Graduate (Automation)
+
+1. When the student completes the third feedback form in the course (last form), an automation makes their **status column** change to **'Graduate'**.
