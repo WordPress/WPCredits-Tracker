@@ -32,19 +32,15 @@ The WordPress Credits Program Team
 
 ### Step 3.1: Invitation to the course 
 
-1. Every week, Celi will look for 'Vetted Positive' and:
-    - Invite them to learn.wordpress.org as subscribers.
-    - Change their Status to 'Course Invitation Email Sent'
-    - [This email](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them. 
+1. When the status changes to 'Vetted Positive, [this email](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them. 
 
 ### Step 3.2: Course completed - Welcome/Info email
 
 1. When they complete the course, the mentor writes back to internships@wordpressfoundation.org to let us know.
-2. We (Celi/Isotta for now) check if the course is passed in Sensei.
-3. If passed:
+2. We (Celi for now):
    - We change Status column to 'Active'.
    - We create a filtered view of the Student Report table for that mentor with a password protected link.
    - We create a 1 time link for the password with https://1ty.me.
    - We add both urls (personal Student Report table and 1ty) to the Mentors table columns 'Student Report personal table' and 'Password for Student Report personal table'
-7. [This welcome email (second tab)](https://docs.google.com/document/d/16jPQ_3Q7AkZr8xfrguoAoERFt7DRF50SMbnKZNUhJ1Y/edit?usp=sharing) is sent automatically to them.
-8. We invite them to the #WP-Credits private channel. 
+3. [This welcome email (second tab)](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them.
+4. We (Celi for now) invite them to the #WP-Credits private channel. 
