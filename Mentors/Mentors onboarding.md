@@ -59,5 +59,6 @@ While we would have been delighted to welcome you to the team, we regret to info
 Thank you again for your interest and support.
 
 Best regards,
-The WordPress Credits Team
+The WordPress Credits Program Team
+
 ----
