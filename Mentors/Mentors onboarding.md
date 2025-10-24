@@ -25,14 +25,14 @@ The WordPress Credits Program Team
 
 1. Isotta (for now) will vet the mentors aplications and introduce in the Status:
     - Vetted Positive
-    - Vetted Negative
+    - Declined
     - Needs Second Opinion
 
 ## Step 3: Onboarding to 'Vetted Positive' 
 
 ### Step 3.1: Invitation to the course 
 
-1. When the status changes to 'Vetted Positive, [this email](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them. 
+1. When the status changes to 'Vetted Positive', [this email](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them. 
 
 ### Step 3.2: Course completed - Welcome/Info email
 
@@ -43,4 +43,21 @@ The WordPress Credits Program Team
    - We create a 1 time link for the password with https://1ty.me.
    - We add both urls (personal Student Report table and 1ty) to the Mentors table columns 'Student Report personal table' and 'Password for Student Report personal table'
 3. [This welcome email (second tab)](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them.
-4. We (Celi for now) invite them to the #WP-Credits private channel. 
+4. We (Celi for now) invite them to the #WP-Credits private channel.
+
+## Step 4: Communication to 'Declined' 
+
+1. When the status changes to 'Declined', this email is sent automatically:
+
+----
+Dear [Full Name],
+
+Thank you sincerely for expressing your interest in supporting and educating students through the WordPress Credits program. We truly appreciate your enthusiasm and your commitment to fostering contributions within the community.
+
+While we would have been delighted to welcome you to the team, we regret to inform you that your application was not selected. We genuinely value the time and effort you invested, and we encourage you to stay involved with the WordPress Credits initiative by contributing in other ways, such as joining discussions in the [WordPress Credits Slack channel](https://wordpress.slack.com/archives/C0959D2M3T8) or helping out with specific tasks in our [GitHub repository](https://github.com/WordPress/WPCredits-Tracker).
+
+Thank you again for your interest and support.
+
+Best regards,
+The WordPress Credits Team
+----
