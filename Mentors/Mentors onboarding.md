@@ -30,7 +30,7 @@ The WordPress Credits Program Team
 
 ## Step 3: Onboarding to 'Vetted Positive' 
 
-### Step 3.1: Invitation to the course 
+### Step 3.1: Invitation to the course (course is closed to the public, access only with invitation link)
 
 1. When the status changes to 'Vetted Positive', [this email](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them. 
 
