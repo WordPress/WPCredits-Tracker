@@ -101,4 +101,4 @@ We invite companies to learn more about how to support the program by [visiting 
 WordPress Credits lowers the barriers to open source contribution, supports the academic and professional development of students, and helps build a diverse, sustainable contributor pipeline for the WordPress project.
 By welcoming students, mentors, sponsors, and volunteers into this initiative, we are shaping not only the future of WordPress, but the future of open source itself.
 
-To find more information, please visit the [WordPress Credit Handbook section](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/).
+To find more information, please visit the [WordPress Credits Handbook section](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/).

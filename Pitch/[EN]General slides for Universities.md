@@ -24,7 +24,7 @@ WPF supports education, research, and community initiatives without discriminati
 
 ## **Why WordPress?**
 
-Wordpress gives you the opportunity to develop digital, project management, and communication skills highly valued across industries.
+WordPress gives you the opportunity to develop digital, project management, and communication skills highly valued across industries.
 
 ### 43% World Websites
 
