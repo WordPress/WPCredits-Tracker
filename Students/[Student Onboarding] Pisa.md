@@ -7,12 +7,12 @@ In all cases (EXCEPT the last 2 steps, 4th and 5th), the email has been conditio
 
 1. The student fill up the form and indicates **'Pisa University'** as their institution.
 2. 'Status' column needs to be **empty** at this point.
-3. Airtable sends an email to asking the student to book a meeting with Isotta (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3932399) as reference) with interships@wordpressfundation.org in copy. 
+3. Airtable sends an email to asking the student to book a meeting with Isotta (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3932399) as reference) with internships@wordpressfoundation.org in copy. 
 
 ## Step 2: After the Individual Meeting with Isotta
 
 1. Isotta applies the status **'Interested'** in the 'Status' column.
-2. Airtable sends the email asking for all information needed for the Agreement (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3910748) as reference) with interships@wordpressfundation.org in copy.
+2. Airtable sends the email asking for all information needed for the Agreement (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3910748) as reference) with internships@wordpressfoundation.org in copy.
 
 ## Step 3: Agreement Signature and Process
 
@@ -25,7 +25,7 @@ In all cases (EXCEPT the last 2 steps, 4th and 5th), the email has been conditio
 
 1. After assigning **In Sensei** to the student's 'Status' column, we need to assign a mentor to the student. 
 2. When the student's 'Status' column is **In Sensei** + **'Mentor' column is not empty**:
-   -  Airtable sends the welcome email with the mentor and interships@wordpressfundation.org in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference).
+   -  Airtable sends the welcome email with the mentor and internships@wordpressfoundation.org in copy (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3934763) as reference).
    -  Airtable creates a record for the student in 'Students Reports' and 'Feedback'.
 
 
