@@ -5,3 +5,5 @@
 - Bengali: https://gamma.app/docs/WordPress-Credits-Bengali-5v71d76zldhrjwf
 - Gujarati: https://gamma.app/docs/WordPress-Credits-Gujarati-4eihw0av46yc20h
 - Malaysian: https://gamma.app/docs/WordPress-Credits-Malaysian-8jseeyseegyaern
+- Filipino: https://gamma.app/docs/WordPress-Credits-Filipino-etf2cwq6h1ls0of
+- French: https://gamma.app/docs/French-WordPress-Credits-hjerof348rjkw6b
