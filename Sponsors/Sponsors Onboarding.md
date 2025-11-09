@@ -1,0 +1,161 @@
+# Sponsors Onboarding
+
+## STEP 1 - When they submit the form: 
+
+### OPTION 1.1.1 + 1.1.2
+
+When they select the options:
+
+**1.1.1 ‘Sponsor a mentor or multiple mentors’ + Internal**
+
+or
+
+**1.1.2 ‘Sponsor a mentor or multiple mentors’ + external + we have already decide our candidate**
+
+They received this automated email (without copy to internships@wordpressfoundation.org): 
+
+--
+
+Subject: Thank you for sponsoring mentors for WordPress Credits program
+Body:
+Hi! 
+
+Thank you very much for your generous support and for choosing to sponsor one or more mentors in the WordPress Credits Program. We truly appreciate your commitment to empowering the next generation of WordPress contributors.
+
+To move forward, please ask your sponsored mentor(s) to complete our [Call for Mentors Form](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/a-guide-for-wp-credits-mentors/call-for-mentors/) as soon as possible so we can begin their onboarding process. For convenience, here’s the [direct link to the form](https://airtable.com/appIzQKfwTn5dyPVp/shrFUiCzMP8zwrouL) as well.
+
+When filling out the form, we kindly ask that they indicate your company’s name as their sponsor, so we can correctly link their application.
+
+Once the form has been submitted, mentors will receive a confirmation email followed by additional instructions within a few days. Their next step will be to complete a short, easy Mentor Course designed to help them get familiar with the program and its processes.
+
+If you have any questions or need assistance at any stage, please don’t hesitate to reach out.
+
+Thanks again for your support of the WordPress Credits Program. We’re excited to welcome your mentors onboard!
+
+Warm regards,
+
+The WordPress Credits Team
+
+--
+
+### OPTION 1.2 
+
+When they select the option:
+
+**1.2. ‘Sponsor a mentor or multiple mentors’ + external + no, we are opened to suggestions**
+
+They received this automated email (with copy to internships@wordpressfoundation.org): 
+
+--
+Subject: Thank you for sponsoring mentors for WordPress Credits program
+Body:
+Hi!
+Thank you very much for your generous support and for choosing to sponsor one or more mentors in the WordPress Credits Program. We truly appreciate your commitment to empowering the next generation of WordPress contributors.
+
+Since you mentioned you’re open to suggestions for external mentors, we’ll review our current pool of mentors in need of sponsorship and will connect you with a suitable candidate or candidates soon. Once we identify a match, we’ll facilitate the introduction so you can coordinate directly with your sponsored mentor(s).
+
+If you have any questions or would like to share any preferences about the mentor’s profile, please don’t hesitate to reach out.
+
+Thanks again for your support of the WordPress Credits Program. We’re excited to collaborate with you and welcome your sponsored mentor soon!
+
+Warm regards,
+The WordPress Credits Team
+
+--
+
+### OPTION 1.3.1 + 1.3.2
+
+When they select the options:
+
+**1.3.1 ‘ Sponsor mentors + tools or services’ + Internal**
+
+or
+
+**1.3.2  ‘ Sponsor mentors + tools or services’ + external + we have already decide our candidate**
+
+They received this automated email (with copy to internships@wordpressfoundation.org): 
+
+--
+
+Subject: Thank you for sponsoring mentors and tools for WordPress Credits program
+Body:
+Hi! 
+
+Thank you very much for your generous support and for choosing to sponsor one or more mentors in the WordPress Credits Program. We truly appreciate your commitment to empowering the next generation of WordPress contributors, and for also offering tools or services to support the program.
+
+To move forward, please ask your sponsored mentor(s) to complete our [Call for Mentors Form](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/a-guide-for-wp-credits-mentors/call-for-mentors/) as soon as possible so we can begin their onboarding process. For convenience, here’s the [direct link to the form](https://airtable.com/appIzQKfwTn5dyPVp/shrFUiCzMP8zwrouL) as well.
+
+When filling out the form, we kindly ask that they indicate your company’s name as their sponsor, so we can correctly link their application.
+
+Once the form has been submitted, mentors will receive a confirmation email followed by additional instructions within a few days. Their next step will be to complete a short, easy Mentor Course designed to help them get familiar with the program and its processes.
+
+We’ve also noted your offer of tools or services for students and will review it shortly. Once your sponsored mentors are onboard and active, we’ll provide students with access to your offer throughout the program course.
+
+If you have any questions or need assistance at any stage, please don’t hesitate to reach out.
+
+Thanks again for your generous support of the WordPress Credits Program. We’re excited to welcome your mentors and explore how your additional contributions can enhance the experience for our students!
+
+Warm regards,
+
+The WordPress Credits Team
+
+--
+
+### OPTION 1.4 
+
+When they select the option:
+
+**1.4 ‘ Sponsor mentors + tools or services’ + external + no, we are opened to suggestions**
+
+
+They received this automated email (with copy to internships@wordpressfoundation.org): 
+
+--
+
+Subject: Thank you for sponsoring mentors and tools for the WordPress Credits Program
+Body:
+Hi!
+
+Thank you very much for your generous support and for choosing to sponsor one or more mentors in the WordPress Credits Program. We truly appreciate your commitment to empowering the next generation of WordPress contributors, and for also offering tools or services to support the program.
+
+Since you mentioned you’re open to suggestions for external mentors, we’ll review our current pool of mentors in need of sponsorship and connect you with a suitable candidate or candidates soon. Once we identify a match, we’ll facilitate the introduction so you can coordinate directly with your sponsored mentor(s).
+
+We’ve also noted your offer of tools or services for students and will review it shortly. Once your sponsored mentors are onboard and active, we’ll provide students with access to your offer throughout the program course.
+
+If you have any questions or would like to share any preferences about the mentor’s profile, please don’t hesitate to reach out.
+
+Thanks again for your generous support of the WordPress Credits Program. We’re excited to collaborate with you and explore how your additional contributions can enhance the experience for our students!
+
+Warm regards,
+The WordPress Credits Team
+
+--
+
+### OPTION 1.5 
+
+When they select the option:
+
+**1.5 'Other'**
+
+They received this automated email (with copy to internships@wordpressfoundation.org): 
+
+--
+
+Subject: Thank you for your sponsorship proposal for the WordPress Credits Program
+Body:
+Hi!
+
+Thank you very much for reaching out and for your interest in supporting the WordPress Credits Program. We truly appreciate your willingness to contribute and share new ideas to help empower the next generation of WordPress contributors.
+
+We’ve received your sponsorship proposal and will review it carefully to understand how it could best fit within the program. Our team will contact you soon to discuss the details and explore the next steps together.
+
+If you have any additional information or materials you’d like to share in the meantime, please feel free to reply to this email.
+
+Thanks again for your support and for helping strengthen the WordPress community through the WordPress Credits Program.
+
+Warm regards,
+The WordPress Credits Team
+
+--
+
+## STEP 2 - Follow up  
