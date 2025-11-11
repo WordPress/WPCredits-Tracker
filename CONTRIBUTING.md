@@ -44,3 +44,45 @@ This project uses the following branching strategy:
 - **Default branch**: `trunk` (following WordPress conventions)
 - **Feature branches**: Create descriptive branch names like `feature/mentor-onboarding-update` or `fix/student-checklist-typo`
 
+## Reporting Issues
+
+When reporting issues or suggesting improvements:
+
+1. Search existing issues to avoid duplicates
+2. Use descriptive titles that clearly explain the problem or suggestion
+3. For documentation issues, specify:
+   - Which document or section needs attention
+   - Whether it's unclear, outdated, or missing information
+   - Your suggested improvement (if applicable)
+4. For process improvements, describe:
+   - Current workflow or process
+   - Identified problem or inefficiency
+   - Proposed solution
+
+## Pull Request Guidelines
+
+1. **Fork and Branch**: Create a topic branch from `trunk`
+2. **Clear Description**: Explain what your changes accomplish and why
+3. **Small, Focused Changes**: Keep PRs focused on a single improvement
+4. **Review Process**: All changes require review from project maintainers
+5. **Documentation Standards**: Follow existing formatting and style conventions
+
+## Contribution Environment
+
+This project primarily consists of Markdown documentation files. For local development:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/WordPress/WPCredits-Tracker.git
+   cd WPCredits-Tracker
+   ```
+
+2. **Create a new branch**:
+   ```bash
+   git checkout -b feature/your-improvement-name
+   ```
+
+3. **Make your changes** using any Markdown editor
+4. **Preview your changes** using a Markdown preview tool or GitHub's preview
+5. **Commit and push** your changes
+6. **Open a Pull Request** with a clear description
