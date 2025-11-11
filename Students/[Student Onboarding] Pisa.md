@@ -17,9 +17,9 @@ In all cases (EXCEPT the last 2 steps, 4th and 5th), the email has been conditio
 ## Step 3: Agreement Signature and Process
 
 1. Students provide all needed information.
-2. Isotta prepares the agreement, sign it, and send it to the student and ask the student to sign it and to complete the signature round (tutor + send to the intership office).
-3. The students needs to confirm Isotta that the intership office has activated the project. 
-4. **When the project has been activated on the intership portal**, Isotta assigns the status **In Sensei** to the student's 'Status' column.
+2. Isotta prepares the agreement, sign it, and send it to the student and ask the student to sign it and to complete the signature round (tutor + send to the internship office).
+3. The students needs to confirm Isotta that the internship office has activated the project. 
+4. **When the project has been activated on the internship portal**, Isotta assigns the status **In Sensei** to the student's 'Status' column.
 
 ## Step 4: Mentor Assignment and Welcome Email to the Course 
 

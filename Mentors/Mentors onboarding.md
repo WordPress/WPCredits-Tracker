@@ -23,7 +23,7 @@ The WordPress Credits Program Team
 ----
 ## Step 2: Vetting
 
-1. Isotta (for now) will vet the mentors aplications and introduce in the Status:
+1. Isotta (for now) will vet the mentors applications and introduce in the Status:
     - Vetted Positive
     - Declined
     - Needs Second Opinion

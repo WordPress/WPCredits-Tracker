@@ -55,7 +55,7 @@ The only option that looks promising for tracking student progress in GitHub in 
 
 ## **Create a website with LMS to track students**
 
-* Sensei Pro and addons (sponsored by Auttomatic)  
+* Sensei Pro and addons (sponsored by Automattic)  
 * We can add teachers/mentors, grading, activities, etc.   
 * We can still use slack as a communication channel outside between mentor and student.   
 * We can use the website to introduce forms, slides pages (like a power point for pitches), etc. 
