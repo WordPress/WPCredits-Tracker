@@ -105,3 +105,17 @@ This project primarily consists of Markdown documentation files. For local devel
 - Verify external links are current and accessible
 - Reference official WordPress resources when applicable
 
+## Getting Help
+
+If you're unsure where to start or have questions about contributing:
+
+1. **Review existing issues** to see what's currently being worked on
+2. **Check the README.md** for project overview and context
+3. **Open a discussion issue** if you have ideas but aren't sure how to implement them
+4. **Contact project maintainers** through GitHub issues for guidance
+
+## Recognition
+
+All contributors will be acknowledged for their contributions to improving the WordPress Credits program. Your efforts help make the program more accessible and effective for students, mentors, and institutions worldwide.
+
+Thank you for helping improve the WordPress Credits Contribution Internship Program documentation!
