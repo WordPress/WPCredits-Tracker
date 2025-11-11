@@ -20,3 +20,27 @@ Either way, please include a description of the purpose behind the change so tha
 
 Any edit requires a review from project maintainers before being merged. Reviews can be requested in the upper right of the Pull Request form.
 
+## Types of Contributions
+
+We welcome various types of contributions to improve the WP Credits Tracker program:
+
+### Documentation Improvements
+- **Student Onboarding**: Enhance guides for new students joining the program
+- **Mentor Resources**: Improve training materials and guides for mentors
+- **Institutional Materials**: Update onboarding and pitch materials for universities
+- **Operations**: Refine tracking systems and operational procedures
+
+### Content Categories
+- **Students/**: Materials for student participants
+- **Mentors/**: Resources for mentor training and guidance
+- **Institutions/**: University and institution onboarding materials
+- **Sponsors/**: Sponsor-related documentation and tracking
+- **Setup Documents/**: Operational procedures and tracking systems
+- **Pitch/**: Presentation materials for universities and stakeholders
+
+## Branch Strategy
+
+This project uses the following branching strategy:
+- **Default branch**: `trunk` (following WordPress conventions)
+- **Feature branches**: Create descriptive branch names like `feature/mentor-onboarding-update` or `fix/student-checklist-typo`
+
