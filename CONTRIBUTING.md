@@ -86,3 +86,22 @@ This project primarily consists of Markdown documentation files. For local devel
 4. **Preview your changes** using a Markdown preview tool or GitHub's preview
 5. **Commit and push** your changes
 6. **Open a Pull Request** with a clear description
+
+## Content Guidelines
+
+### Writing Style
+- Use clear, accessible language suitable for international contributors
+- Follow WordPress documentation style guidelines
+- Include practical examples where helpful
+- Keep content up-to-date with current WordPress practices
+
+### File Organization
+- Place new files in appropriate directories based on their target audience
+- Use descriptive filenames that clearly indicate content purpose
+- Maintain consistent formatting across similar document types
+
+### Links and References
+- Use relative links for internal documentation
+- Verify external links are current and accessible
+- Reference official WordPress resources when applicable
+
