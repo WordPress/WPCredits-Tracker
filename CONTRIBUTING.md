@@ -8,3 +8,15 @@ All WordPress projects are [licensed under the GPLv2+](/LICENSE.md), and all con
 
 This document covers the technical details around setup and submitting your contribution to this project.
 
+## Making Edits
+
+Pull Requests are welcome!
+
+Please feel free to start a Pull Request (PR) by [using the "Edit" button](https://help.github.com/en/github/managing-files-in-a-repository/editing-files-in-another-users-repository) next to one of the documentation pages, or by [forking and cloning the repo](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project) (check the [Forks](https://github.com/WordPress/WPCredits-Tracker/network/members)).
+
+All documentation is written in plain text using the Markdown format. Don't worry about any specific flavor of Markdown it's checked and cleaned before generating it to HTML.
+
+Either way, please include a description of the purpose behind the change so that it's easy for folks to review.
+
+Any edit requires a review from project maintainers before being merged. Reviews can be requested in the upper right of the Pull Request form.
+
