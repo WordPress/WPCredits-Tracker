@@ -1,11 +1,14 @@
 # Contributing
+Thank you for your interest in contributing to [WordPress Credits: Contribution Program for Students](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/)
 
-Thank you for your interest in contributing to the [WordPress Credits: Contribution Program for Students](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/)
+WordPress Credits is an initiative by the WordPress Foundation that invites university students to contribute directly to the WordPress open source project. Through structured mentorship, hands-on projects, and community engagement, the program helps students build transferable skills, gain real-world experience, and become part of a global network of open source contributors.
 
-WordPress Credits is a contribution-based internship program by the WordPress Foundation that brings university students into the heart of the WordPress open source project. The program helps students develop transferable skills, gain practical experience, and join a global community of open source contributors. Through the program, students collaborate with volunteers and professionals from companies in the WordPress ecosystem. While we encourage connections that could lead to paid opportunities, the internship itself does not offer compensation.
+Students collaborate with experienced volunteers and professionals from across the WordPress ecosystem. While the program may spark pathways to future opportunities, it is an unpaid, educational internship focused on learning and contribution.
 
-### Universities and educational institutions
-Universities and educational institutions interested in participating can reach out by filling the [interest form](https://airtable.com/appIzQKfwTn5dyPVp/shrYvY0CDNIkILIre).
+### For Universities & Educational Institutions
+If your institution is interested in integrating WordPress Credits into your curriculum or offering it to your students, please complete our [interest form](https://airtable.com/appIzQKfwTn5dyPVp/shrYvY0CDNIkILIre).
 
-### Companies and sponsors
-We invite companies to learn more about how to support the program by visiting the [dedicated page](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/get-involved-company-guide/).
+### For Companies & Sponsors
+We welcome organizations that want to support the next generation of WordPress contributors. Learn more about sponsorship options—including mentor funding, tool donations, and project-based support—on our [dedicated page](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/get-involved-company-guide/).
+
+Together, we’re shaping the future of open source—one student at a time.
