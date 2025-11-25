@@ -44,7 +44,8 @@ The WordPress Credits Program Team
    - We add both urls (personal Student Report table and 1ty) to the Mentors table columns 'Student Report personal table' and 'Password for Student Report personal table'
 3. [This welcome email (second tab)](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them.
 4. We invite them to the #WP-Credits private Slack channel.
-5. We give them access to the sponsors coupon spreadsheet (see link in the #WP-Credits private Slack channel Canvas). 
+5. We give them access to the sponsors coupon spreadsheet (see link in the #WP-Credits private Slack channel Canvas).
+6. Make sure to mark their email in Helpscout as close when finished.
 
 ## Step 4: Communication to 'Declined' 
 
