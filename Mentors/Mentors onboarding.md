@@ -37,13 +37,14 @@ The WordPress Credits Program Team
 ### Step 3.2: Course completed - Welcome/Info email
 
 1. When they complete the course, the mentor writes back to internships@wordpressfoundation.org to let us know.
-2. We (Celi for now):
-   - We change Status column to 'Active'.
-   - We create a filtered view of the Student Report table for that mentor with a password protected link.
-   - We create a 1 time link for the password with https://1ty.me.
+2. We:
+   - Change Status column to 'Active'.
+   - Create a filtered view of the Student Report table for that mentor with a password protected link.
+   - Create a 1 time link for the password with https://1ty.me.
    - We add both urls (personal Student Report table and 1ty) to the Mentors table columns 'Student Report personal table' and 'Password for Student Report personal table'
 3. [This welcome email (second tab)](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them.
-4. We (Celi for now) invite them to the #WP-Credits private channel.
+4. We invite them to the #WP-Credits private Slack channel.
+5. We give them access to the sponsors coupon spreadsheet (see link in the #WP-Credits private Slack channel Canvas). 
 
 ## Step 4: Communication to 'Declined' 
 
@@ -52,11 +53,15 @@ The WordPress Credits Program Team
 ----
 Dear [Full Name],
 
-Thank you sincerely for expressing your interest in supporting and educating students through the WordPress Credits program. We truly appreciate your enthusiasm and your commitment to fostering contributions within the community.
+Thank you sincerely for expressing your interest in supporting and educating students through the WordPress Credits program. We truly appreciate your enthusiasm and your commitment to fostering contributions within the WordPress community.
 
-While we would have been delighted to welcome you to the team, we regret to inform you that your application was not selected. We genuinely value the time and effort you invested, and we encourage you to stay involved with the WordPress Credits initiative by contributing in other ways, such as joining discussions in the [WordPress Credits Slack channel](https://wordpress.slack.com/archives/C0959D2M3T8) or helping out with specific tasks in our [GitHub repository](https://github.com/WordPress/WPCredits-Tracker).
+While we would have been delighted to welcome you to the team, after reviewing your application, we found that the information available in your WordPress.org profile was not sufficient to confirm your eligibility to serve as a mentor at this time. We genuinely value the time and effort you invested, and we encourage you to stay involved with the WordPress Credits initiative by contributing in other ways, such as joining discussions in the [WordPress Credits Slack channel](https://wordpress.slack.com/archives/C0959D2M3T8) or helping out with specific tasks in our [GitHub repository](https://github.com/WordPress/WPCredits-Tracker).
 
-Thank you again for your interest and support.
+If you would like to appeal this decision or share additional details about your background, experience, and reasons why you'd be a great fit as a mentor, please reply to this email and provide more context about your involvement with WordPress and any mentoring or teaching experience you may have.
+
+We truly appreciate your willingness to contribute to this initiative and would be happy to review your application again once more information is available.
+
+Thank you once again for your time, interest, and support.
 
 Best regards,
 The WordPress Credits Program Team
