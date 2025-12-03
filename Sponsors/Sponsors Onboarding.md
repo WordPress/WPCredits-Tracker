@@ -47,16 +47,19 @@ When they select the option:
 They received this automated email (with copy to internships@wordpressfoundation.org): 
 
 --
+
 Subject: Thank you for sponsoring mentors for WordPress Credits program
+
 Body:
+
 Hi!
 Thank you very much for your generous support and for choosing to sponsor one or more mentors in the WordPress Credits Program. We truly appreciate your commitment to empowering the next generation of WordPress contributors.
 
-Since you mentioned you’re open to suggestions for external mentors, we’ll review our current pool of mentors in need of sponsorship and will connect you with a suitable candidate or candidates soon. Once we identify a match, we’ll facilitate the introduction so you can coordinate directly with your sponsored mentor(s).
+Since you mentioned you’re open to suggestions for external mentors, please review our current pool of mentors in need of sponsorship in [this list](https://airtable.com/appIzQKfwTn5dyPVp/shry3JI1xswUre52g). Once you have identified a mentor or mentors you are interested in sponsoring and reached an agreement with them, please ask them to contact us and let us know about the sponsorship.
 
-If you have any questions or would like to share any preferences about the mentor’s profile, please don’t hesitate to reach out.
+If you have any questions, please don’t hesitate to reach out.
 
-Thanks again for your support of the WordPress Credits Program. We’re excited to collaborate with you and welcome your sponsored mentor soon!
+Thanks again for your support of the WordPress Credits Program. We’re excited to collaborate with you!
 
 Warm regards,
 The WordPress Credits Team
@@ -118,7 +121,7 @@ Hi!
 
 Thank you very much for your generous support and for choosing to sponsor one or more mentors in the WordPress Credits Program. We truly appreciate your commitment to empowering the next generation of WordPress contributors, and for also offering tools or services to support the program.
 
-Since you mentioned you’re open to suggestions for external mentors, we’ll review our current pool of mentors in need of sponsorship and connect you with a suitable candidate or candidates soon. Once we identify a match, we’ll facilitate the introduction so you can coordinate directly with your sponsored mentor(s).
+Since you mentioned you’re open to suggestions for external mentors, please review our current pool of mentors in need of sponsorship in [this list](https://airtable.com/appIzQKfwTn5dyPVp/shry3JI1xswUre52g). Once you have identified a mentor or mentors you are interested in sponsoring and reached an agreement with them, please ask them to contact us and let us know about the sponsorship.
 
 We’ve also noted your offer of tools or services for students and will review it shortly. Once your sponsored mentors are onboard and active, we’ll provide students with access to your offer throughout the program course.
 
