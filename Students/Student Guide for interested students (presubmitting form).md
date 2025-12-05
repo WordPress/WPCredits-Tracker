@@ -53,7 +53,7 @@ This program is not just about completing hours. It’s about **learning, growin
 
 We’re excited to have you join the program and can’t wait to see what you’ll create\!
 
-If you have any questions before applying, please send us an email at [internships@wordpressfoundation.org](mailto:internships@wordpressfoundation.org).
+If you have any questions before applying, please send us an email at [education@wordpressfoundation.org](mailto:education@wordpressfoundation.org).
 
 If you are ready to apply to WordPress Credits project, please fill up [this form](https://airtable.com/appIzQKfwTn5dyPVp/shrnGtYh2MFPgPOPm). 
 
