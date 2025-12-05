@@ -40,7 +40,7 @@ Students receive foundational training and become familiar with the tools and cu
   - [Writing in the WordPress voice](https://learn.wordpress.org/course/writing-in-the-wordpress-voice/)
   - [Basic principles of conflict resolution](https://learn.wordpress.org/course/basic-principles-of-conflict-resolution/)
 - Join the WordPress team on the global [Slack](https://make.wordpress.org/chat/)
-  - Join your country based team on the local Slack
+  - Join your country-based team on the local Slack
 - Connect with your mentor
 
 Depending on prior experience, students complete one of the following learning paths:
@@ -101,4 +101,4 @@ We invite companies to learn more about how to support the program by [visiting 
 WordPress Credits lowers the barriers to open source contribution, supports the academic and professional development of students, and helps build a diverse, sustainable contributor pipeline for the WordPress project.
 By welcoming students, mentors, sponsors, and volunteers into this initiative, we are shaping not only the future of WordPress, but the future of open source itself.
 
-To find more information, please visit the [WordPress Credits Handbook section](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/).
+For more information, please visit the [WordPress Credits Handbook section](https://make.wordpress.org/handbook/wordpress-credits-contribution-internship-program/).
