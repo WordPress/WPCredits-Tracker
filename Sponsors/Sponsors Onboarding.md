@@ -12,7 +12,7 @@ or
 
 **1.1.2 ‘Sponsor a mentor or multiple mentors’ + external + we have already decide our candidate**
 
-They received this automated email (without copy to internships@wordpressfoundation.org): 
+They received this automated email (without copy to education@wordpressfoundation.org): 
 
 --
 
@@ -44,7 +44,7 @@ When they select the option:
 
 **1.2. ‘Sponsor a mentor or multiple mentors’ + external + no, we are opened to suggestions**
 
-They received this automated email (with copy to internships@wordpressfoundation.org): 
+They received this automated email (with copy to education@wordpressfoundation.org): 
 
 --
 
@@ -76,7 +76,7 @@ or
 
 **1.3.2  ‘ Sponsor mentors + tools or services’ + external + we have already decide our candidate**
 
-They received this automated email (with copy to internships@wordpressfoundation.org): 
+They received this automated email (with copy to education@wordpressfoundation.org): 
 
 --
 
@@ -111,7 +111,7 @@ When they select the option:
 **1.4 ‘ Sponsor mentors + tools or services’ + external + no, we are opened to suggestions**
 
 
-They received this automated email (with copy to internships@wordpressfoundation.org): 
+They received this automated email (with copy to education@wordpressfoundation.org): 
 
 --
 
@@ -140,7 +140,7 @@ When they select the option:
 
 **1.5 'Other'**
 
-They received this automated email (with copy to internships@wordpressfoundation.org): 
+They received this automated email (with copy to education@wordpressfoundation.org): 
 
 --
 
