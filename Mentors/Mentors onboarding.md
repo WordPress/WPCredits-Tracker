@@ -36,7 +36,7 @@ The WordPress Credits Program Team
 
 ### Step 3.2: Course completed - Welcome/Info email
 
-1. When they complete the course, the mentor writes back to internships@wordpressfoundation.org to let us know.
+1. When they complete the course, the mentor writes back to education@wordpressfoundation.org to let us know.
 2. We:
    - Change Status column to 'Active'.
    - Create a filtered view of the Student Report table for that mentor with a password protected link.
