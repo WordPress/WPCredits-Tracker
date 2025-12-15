@@ -2,15 +2,15 @@
 
 ## STEP 1 - When they submit the form: 
 
-### OPTION 1.1.1 + 1.1.2
+### OPTION 1.1 + 1.2
 
 When they select the options:
 
-**1.1.1 ‘Sponsor a mentor or multiple mentors’ + Internal**
+**1.1 ‘Sponsor a mentor or multiple mentors’ + Internal**
 
 or
 
-**1.1.2 ‘Sponsor a mentor or multiple mentors’ + external + we have already decide our candidate**
+**1.2 ‘Sponsor a mentor or multiple mentors’ + external + we have already decide our candidate**
 
 They received this automated email (without copy to education@wordpressfoundation.org): 
 
@@ -38,11 +38,11 @@ The WordPress Credits Team
 
 --
 
-### OPTION 1.2 
+### OPTION 2 
 
 When they select the option:
 
-**1.2. ‘Sponsor a mentor or multiple mentors’ + external + no, we are opened to suggestions**
+**2. ‘Sponsor a mentor or multiple mentors’ + external + no, we are opened to suggestions**
 
 They received this automated email (with copy to education@wordpressfoundation.org): 
 
@@ -66,15 +66,15 @@ The WordPress Credits Team
 
 --
 
-### OPTION 1.3.1 + 1.3.2
+### OPTION 3.1 + 3.2
 
 When they select the options:
 
-**1.3.1 ‘ Sponsor mentors + tools or services’ + Internal**
+**3.1 ‘ Sponsor mentors + tools or services’ + Internal**
 
 or
 
-**1.3.2  ‘ Sponsor mentors + tools or services’ + external + we have already decide our candidate**
+**3.2  ‘ Sponsor mentors + tools or services’ + external + we have already decide our candidate**
 
 They received this automated email (with copy to education@wordpressfoundation.org): 
 
@@ -104,11 +104,11 @@ The WordPress Credits Team
 
 --
 
-### OPTION 1.4 
+### OPTION 4 
 
 When they select the option:
 
-**1.4 ‘ Sponsor mentors + tools or services’ + external + no, we are opened to suggestions**
+**4 ‘ Sponsor mentors + tools or services’ + external + no, we are opened to suggestions**
 
 
 They received this automated email (with copy to education@wordpressfoundation.org): 
@@ -134,11 +134,11 @@ The WordPress Credits Team
 
 --
 
-### OPTION 1.5 
+### OPTION 5 
 
 When they select the option:
 
-**1.5 'Other'**
+**5 'Other'**
 
 They received this automated email (with copy to education@wordpressfoundation.org): 
 
@@ -162,3 +162,38 @@ The WordPress Credits Team
 --
 
 ## STEP 2 - Follow up  
+
+### Option 1.1, 1.2 & 2
+
+They don't need email follow up.
+
+### Option 3 & 4: Include tools or services
+
+- Check that the offer is legit:
+  - It is **useful** for our students
+  - It is a **free** service to students that otherwise would be paid.
+- In case of doubts, check with the admin team or just inform them if the decision is clear.
+
+If it is legit, reply to them with the positive answer and update the following **only after the mentors has become active**: 
+
+  - The offer description table of the last lesson of the onboarding module (create your website).
+  - The offer description table of the course main page.
+  - The logo in the sponsors area of the course main page and the [official website](https://wordpress.org/education/credits/) (for now this should be asked to Isotta Peira every Thursday or sooner in the week).
+
+If it is not legit, reply explaining the negative answer regarding the tools, giving them the chance to improve their offer if they wish and follow their reply back.
+
+The first time you reply to these options, please save the reply as a template for future use in Helpscout. 
+
+### Option 5: Other
+
+- Inform the admin team
+- Reply accordingly after the decision is taken.
+
+The first time you reply to this option, please save the reply as a template for future use in Helpscout. 
+
+### For all options
+
+- Once every month (or more), check the sponsorship of active Mentors in this table and add their logo to the sponsors area of the course main page and [the official website](https://wordpress.org/education/credits/) (for now this should be asked to Isotta Peira every Thursday or sooner in the week). 
+- If a sponsored mentor is not active anymore and their logo is still present (without other mentors being sponsorship by the same company), please remove the logo from the sponsors area of the course main page and the [official website](https://wordpress.org/education/credits/) (for now this should be asked to Isotta Peira every Thursday or sooner in the week). 
+
+
