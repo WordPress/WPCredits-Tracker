@@ -12,7 +12,7 @@ I’m reaching out because [insert connection or reason here].
 
 What is WordPress Credits?
 
-WordPress Credits is a student‑driven program of study where participants learn about and actively contribute to the WordPress project alongside an experienced mentor. Students define their own projects (with mentor guidance), gaining real‑world, collaborative experience in the global WordPress ecosystem. The program is open to both IT and non‑IT students and typically involves a 150‑hour commitment.
+WordPress Credits is a student‑driven program of study where participants learn about and actively contribute to the WordPress project alongside an experienced mentor. Students define their own projects (with mentor guidance), gaining real‑world, collaborative experience in the global WordPress ecosystem. The program is open to both IT and non‑IT students and typically involves a 150‑hour commitment or more.
 
 How a partnership works
 - Your institution joins as a partner university/college.
