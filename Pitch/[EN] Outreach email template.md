@@ -4,7 +4,7 @@ Hello [Contact Name],
 
 I hope you’re doing well!
 
-My name is [Your Name] and I’m a coordinator with the WordPress Foundation, a non‑profit that provides educational resources on WordPress and open‑source software.
+My name is [Your Name] and I’m a volunteer with the WordPress Foundation, a non‑profit that provides educational resources on WordPress and open‑source software.
 
 WordPress is an open‑source content‑management system that powers nearly half of all websites. The WordPress project now offers several education initiatives aimed at introducing students to WordPress and building transferable skills.
 
