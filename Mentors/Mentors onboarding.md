@@ -45,7 +45,7 @@ The WordPress Credits Program Team
 3. [This welcome email (second tab)](https://docs.google.com/document/d/1wuWyAAn1qNIUcOuX3eH1SDaNW4nSt9ja071NpmI6yQo/edit?tab=t.jmr6hou6hy9t) is sent automatically to them.
 4. We invite them to the #WP-Credits private Slack channel.
 5. We give them access to the sponsors coupon spreadsheet (see link in the #WP-Credits private Slack channel Canvas).
-6. We give them access as editors to the [Mentor resource folder.](https://drive.google.com/drive/folders/10N1G77WD9ca3zMc612XoPjEjDtZgDYfa?usp=share_link)
+6. We give them Editor access to the [Mentor resource folder.](https://drive.google.com/drive/folders/10N1G77WD9ca3zMc612XoPjEjDtZgDYfa?usp=share_link)
 7. Make sure to mark their email in Helpscout as close when finished.
 
 ## Step 4: Communication to 'Declined' 
