@@ -22,8 +22,9 @@ Most steps depend on the status of the Institution in Airtable 'Institutions (Fo
 
 ### Step 3.1: 'Agreement Sent' status added
 
-
-
+1. Agreement document is sent to the institution.
+2. Institution is expected to review and sign the agreement.
+3. Follow up communication as needed until agreement is signed.
 
 
 ### Step 3.2: 'Not moving forward' status added
@@ -37,6 +38,8 @@ Most steps depend on the status of the Institution in Airtable 'Institutions (Fo
 
 ## Step 4: Agreement signed
 
-### Step 4.1: 
+### Step 4.1: 'Confirmed' status added
 
 1. Manually update 'Status' column in the 'Institution Onboarding' table to 'Confirmed'
+2. Institution is now officially onboarded and ready to begin the program.
+3. Further communication and coordination begins as per program requirements.
