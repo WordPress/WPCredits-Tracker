@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to the WordPress Credits Mentor Course\!
+Welcome to the WordPress Credits Mentor Course!
 
 In this program, you’ll learn how to effectively guide students through their contribution projects in the WordPress Credits program.
 
