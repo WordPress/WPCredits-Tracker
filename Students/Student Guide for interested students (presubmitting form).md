@@ -1,6 +1,6 @@
 # **Student Guide**
 
-Welcome to **WordPress Credits**\!
+Welcome to **WordPress Credits**!
 
 This guide will walk you through what to expect when joining the program, how it works, and how you can make the most of your experience.
 
@@ -45,13 +45,13 @@ By the end of the program, you will:
 1. **Apply** using the [application form](anchor to the button below) at the end of this page.  
 2. Once selected, you’ll receive an agreement and instructions to set up your student account.  
 3. Attend the onboarding session and meet your mentor.  
-4. Start contributing and building your project\!
+4. Start contributing and building your project!
 
 ## **Remember**
 
 This program is not just about completing hours. It’s about **learning, growing, and contributing meaningfully**. Take initiative, stay engaged, and use this opportunity to connect your studies with real-world practice.
 
-We’re excited to have you join the program and can’t wait to see what you’ll create\!
+We’re excited to have you join the program and can’t wait to see what you’ll create!
 
 If you have any questions before applying, please send us an email at [education@wordpressfoundation.org](mailto:education@wordpressfoundation.org).
 
