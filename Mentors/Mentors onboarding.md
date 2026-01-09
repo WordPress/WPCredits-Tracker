@@ -23,7 +23,8 @@ The WordPress Credits Program Team
 ----
 ## Step 2: Vetting
 
-1. Isotta (for now) will vet the mentors applications and introduce in the Status:
+1. We will vet the mentors applications following [these requirements]([url](https://github.com/WordPress/WPCredits-Tracker/blob/7be96cc8b51832ac18f2ecf38f96a1eb285dca97/Mentors/Requirements%20to%20Become%20a%20WP%20Credits%20Mentor.md)) and introduce in the Status:
+2. 
     - Vetted Positive
     - Declined
     - Needs Second Opinion
