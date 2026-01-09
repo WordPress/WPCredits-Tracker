@@ -263,7 +263,7 @@ Meet professionals and industry leaders from around the world during the event.
 
 ---
 
-# **Thank you for your interest\!**
+# **Thank you for your interest!**
 
 Any questions? 
 
