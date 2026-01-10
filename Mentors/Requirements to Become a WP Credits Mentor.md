@@ -2,7 +2,7 @@
 
 To join the WP Credits mentor group, candidates should:
 
-* Have a [wp.org](http://wp.org) account that shows both their [wp.org](http://wp.org) and slack names (if not, it means they are not in slack with that [wp.org](http://wp.org) account).   
+* Have a [wordpress.org](https://wordpress.org) account that shows both their [wordpress.org](https://wordpress.org) and slack names (if not, it means they are not in slack with that [wordpress.org](https://wordpress.org) account).   
 * Demonstrate alignment with the WordPress Foundation mission and values, including openness, collaboration, and respect.  
 * Show a positive and supportive attitude, being a good communicator and de-escalator in challenging situations.  
 * Be committed to student success, willing to dedicate at least 2 hours per week for mentoring and guidance.  
