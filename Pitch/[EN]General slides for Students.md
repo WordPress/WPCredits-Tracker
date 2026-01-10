@@ -200,7 +200,7 @@ Planning and coordination of digital projects.
 
 Automattic (WordPress.com, Jetpack, Woo) 
 
-Ellementor 
+Elementor 
 
 Weglot
 
