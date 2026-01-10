@@ -7,7 +7,7 @@ In all cases (EXCEPT the last 2 steps, 4th and 5th), the email has been conditio
 
 1. The student fills up the form and indicates **'Pisa University'** as their institution.
 2. 'Status' column needs to be **empty** at this point.
-3. Airtable sends an email to asking the student to book a meeting with Isotta (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3932399) as reference) with education@wordpressfoundation.org in copy. 
+3. Airtable sends an email asking the student to book a meeting with Isotta (see [this template](https://secure.helpscout.net/settings/inbox/348355/saved-replies/3932399) as reference) with education@wordpressfoundation.org in copy. 
 
 ## Step 2: After the Individual Meeting with Isotta
 
