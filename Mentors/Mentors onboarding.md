@@ -4,7 +4,7 @@ Most steps depend on the status of the mentor in Airtable 'Mentors' table, so th
 
 ## Step 1: When a Form of Interest is Sent
 
-1. The mentor fill up the form.
+1. The mentor fills up the form.
 2. 'Status' column needs to be **empty** at this point.
 3. Airtable sends the following email:
 
