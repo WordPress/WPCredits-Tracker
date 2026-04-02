@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
 WordPress Credits Dashboard Builder
- 
+
 Fetches data from Airtable and builds the dashboard JSON data blob.
 """
 import os
 import json
+import re
 import sys
+import time
 import requests
 from datetime import datetime
 from pathlib import Path
- 
+
 # Configuration
 BASE_ID = "appIzQKfwTn5dyPVp"
 API_URL = "https://api.airtable.com/v0"
- 
+
 # Table IDs
 TABLES = {
     "students_reports": "tbljYkkVGbeoaWEtY",
@@ -26,7 +28,7 @@ TABLES = {
     "contribution_areas": "tblUBEXiS3QKUCXHf",
     "countries": "tbltB7GSRoTtSi4Ps",
 }
- 
+
 # Field IDs
 FIELDS = {
     "students_reports": {
@@ -74,6 +76,7 @@ FIELDS = {
         "name": "fldZQBu7XS2Z29jx4",
         "city": "fldinUAUulxqjZ7d5",
         "country": "fldMZYV5XmC6FbewY",
+        "current_stage": "fld4l5x6ScLSLaJZl",
     },
     "sponsors": {
         "company_name": "fldezMq2OBVeqn0DK",
@@ -88,7 +91,7 @@ FIELDS = {
         "name": "fldtNqCEbpwdo9F2t",
     },
 }
- 
+
 # Institution markers (hardcoded, won't change often)
 INST_MARKERS = [
     {"city": "Pisa", "country": "Italy", "lat": 43.7228, "lng": 10.4017, "institutions": ["Università di Pisa"]},
@@ -112,55 +115,55 @@ INST_MARKERS = [
     {"city": "Poznań", "country": "Poland", "lat": 52.4064, "lng": 16.9252, "institutions": ["Krakow University of Economics"]},
     {"city": "Hemet", "country": "United States", "lat": 33.7476, "lng": -116.9719, "institutions": ["Central New Mexico Community College"]}
 ]
- 
- 
+
+
 def get_airtable_pat():
     """Get Airtable PAT from environment variable."""
     pat = os.environ.get("AIRTABLE_PAT")
     if not pat:
         raise ValueError("AIRTABLE_PAT environment variable not set")
     return pat
- 
- 
+
+
 def fetch_all_records(base_id, table_id, field_ids, pat):
     """Fetch all records from Airtable table with pagination."""
     url = f"{API_URL}/{base_id}/{table_id}"
     headers = {"Authorization": f"Bearer {pat}"}
     params = {"fields[]": field_ids, "returnFieldsByFieldId": "true", "pageSize": 100}
- 
+
     all_records = []
     offset = None
- 
+
     while True:
         if offset:
             params["offset"] = offset
- 
+
         try:
             r = requests.get(url, headers=headers, params=params, timeout=10)
             r.raise_for_status()
         except requests.RequestException as e:
             print(f"Error fetching {table_id}: {e}", file=sys.stderr)
             raise
- 
+
         data = r.json()
         all_records.extend(data.get("records", []))
         offset = data.get("offset")
- 
+
         if not offset:
             break
- 
+
     return all_records
- 
- 
+
+
 def title_case(text):
     """Convert to title case, preserving Spanish prepositions and acronyms."""
     if not text:
         return text
- 
+
     spanish_lowercase = {"de", "del", "la", "las", "los", "el", "en", "y", "e", "al"}
     words = text.split()
     result = []
- 
+
     for i, word in enumerate(words):
         # Keep acronyms in parentheses uppercase
         if "(" in word and ")" in word:
@@ -173,10 +176,10 @@ def title_case(text):
             result.append(word.lower())
         else:
             result.append(word.capitalize())
- 
+
     return " ".join(result)
- 
- 
+
+
 def extract_wp_username(url):
     """Extract WordPress username from profile URL."""
     if not url:
@@ -186,20 +189,20 @@ def extract_wp_username(url):
         parts = url.rstrip("/").split("/")
         return parts[-1] if parts else None
     return None
- 
- 
+
+
 def get_cohort_from_date(date_str):
     """Determine cohort (Winter/Spring/Summer/Fall) from internship end date."""
     if not date_str:
         return None
- 
+
     try:
         # Parse date: YYYY-MM-DD
         month = int(date_str.split("-")[1])
         year = int(date_str.split("-")[0])
     except (ValueError, IndexError):
         return None
- 
+
     # Winter: Dec 21 – Mar 19 (year of end of range, so Mar = same year)
     if month >= 12 or month <= 3:
         if month == 12:
@@ -215,22 +218,62 @@ def get_cohort_from_date(date_str):
     # Fall: Sep 22 – Dec 20
     elif 9 <= month <= 12:
         return f"Fall {year}"
- 
+
     return None
- 
- 
+
+
 def get_field_value(record, field_id):
     """Safely get field value from Airtable record."""
     fields = record.get("fields", {})
     return fields.get(field_id)
- 
- 
+
+
+def fetch_translation_stats(wp_username):
+    """Fetch translation stats from a WordPress.org profile page.
+
+    Parses the activity feed for entries like:
+      - 'Suggested N string(s)'
+      - 'Translated N string(s)'
+      - 'Reviewed N string(s)'
+
+    Returns dict: {suggested, translated, reviewed, total}
+    """
+    if not wp_username:
+        return {"suggested": 0, "translated": 0, "reviewed": 0, "total": 0}
+
+    url = f"https://profiles.wordpress.org/{wp_username}/"
+    try:
+        r = requests.get(url, timeout=15, headers={"User-Agent": "WPCredits-Dashboard/1.0"})
+        if r.status_code != 200:
+            print(f"  Profile {wp_username}: HTTP {r.status_code}", file=sys.stderr)
+            return {"suggested": 0, "translated": 0, "reviewed": 0, "total": 0}
+        html = r.text
+    except requests.RequestException as e:
+        print(f"  Profile {wp_username}: {e}", file=sys.stderr)
+        return {"suggested": 0, "translated": 0, "reviewed": 0, "total": 0}
+
+    suggested = 0
+    translated = 0
+    reviewed = 0
+
+    # Match patterns like "Suggested 5 strings" or "Translated 1 string"
+    for m in re.finditer(r"Suggested (\d+) strings?", html):
+        suggested += int(m.group(1))
+    for m in re.finditer(r"Translated (\d+) strings?", html):
+        translated += int(m.group(1))
+    for m in re.finditer(r"Reviewed (\d+) strings?", html):
+        reviewed += int(m.group(1))
+
+    total = suggested + translated + reviewed
+    return {"suggested": suggested, "translated": translated, "reviewed": reviewed, "total": total}
+
+
 def main():
     """Build the dashboard data blob."""
     pat = get_airtable_pat()
- 
+
     print("Fetching Airtable data...", file=sys.stderr)
- 
+
     # Fetch all tables
     students_reports_records = fetch_all_records(
         BASE_ID, TABLES["students_reports"],
@@ -264,58 +307,69 @@ def main():
         BASE_ID, TABLES["countries"],
         list(FIELDS["countries"].values()), pat
     )
- 
+
     print(f"Fetched {len(students_reports_records)} student reports", file=sys.stderr)
     print(f"Fetched {len(mentors_records)} mentors", file=sys.stderr)
- 
+
     # Build lookup tables
     institutions_lookup = {}
+    confirmed_institutions = set()
     for rec in institutions_records:
         inst_id = rec["id"]
         name = get_field_value(rec, FIELDS["institutions"]["name"])
+        stage_obj = get_field_value(rec, FIELDS["institutions"]["current_stage"])
+        # Parse singleSelect field
+        stage = None
+        if stage_obj and isinstance(stage_obj, dict):
+            stage = stage_obj.get("name")
+        elif isinstance(stage_obj, str):
+            stage = stage_obj
         if name:
-            institutions_lookup[inst_id] = {"name": title_case(name)}
- 
+            institutions_lookup[inst_id] = {"name": title_case(name), "stage": stage}
+            if stage == "Confirmed":
+                confirmed_institutions.add(title_case(name))
+
     sponsors_lookup = {}
     for rec in sponsors_records:
         sponsor_id = rec["id"]
         name = get_field_value(rec, FIELDS["sponsors"]["company_name"])
         if name:
             sponsors_lookup[sponsor_id] = {"name": title_case(name)}
- 
+
     languages_lookup = {}
     for rec in languages_records:
         lang_id = rec["id"]
         name = get_field_value(rec, FIELDS["languages"]["name"])
         if name:
             languages_lookup[lang_id] = {"name": title_case(name)}
- 
+
     contribution_areas_lookup = {}
     for rec in contribution_areas_records:
         area_id = rec["id"]
         name = get_field_value(rec, FIELDS["contribution_areas"]["name"])
         if name:
             contribution_areas_lookup[area_id] = {"name": title_case(name)}
- 
+
     countries_lookup = {}
     for rec in countries_records:
         country_id = rec["id"]
         name = get_field_value(rec, FIELDS["countries"]["name"])
         if name:
             countries_lookup[country_id] = {"name": title_case(name)}
- 
-    # Build students mapping (name -> record) for cross-reference
+
+    # Build students mapping (normalized name -> record) for cross-reference
     students_by_name = {}
     for rec in students_records:
         name = get_field_value(rec, FIELDS["students"]["full_name"])
         if name:
-            students_by_name[name] = rec
- 
+            normalized = " ".join(name.strip().lower().split())
+            students_by_name[normalized] = rec
+
     # Statuses that count as real participants
     ACTIVE_STATUSES = {"In Sensei", "In Sensei Self-onboarding", "Pending graduation"}
     GRADUATE_STATUS = "Graduate"
     INCLUDED_STATUSES = ACTIVE_STATUSES | {GRADUATE_STATUS}
- 
+
     # Process students
     students = []
     institutions_set = set()
@@ -325,7 +379,7 @@ def main():
     total_hours = 0
     field_of_study_stats = {}
     country_from_mentor = {}  # Track which students have which country via mentor
- 
+
     for rec in students_reports_records:
         name = get_field_value(rec, FIELDS["students_reports"]["name"])
         status_obj = get_field_value(rec, FIELDS["students_reports"]["status"])
@@ -334,7 +388,7 @@ def main():
         internship_end_date = get_field_value(rec, FIELDS["students_reports"]["internship_end_date"])
         lessons_ids = get_field_value(rec, FIELDS["students_reports"]["lessons"]) or []
         teams_ids = get_field_value(rec, FIELDS["students_reports"]["teams"]) or []
- 
+
         # Count completed Learn courses from grade columns (non-empty = completed)
         grade_fields = [
             "grade_open_source", "grade_decisions", "grade_etiquette",
@@ -347,24 +401,24 @@ def main():
             1 for gf in grade_fields
             if get_field_value(rec, FIELDS["students_reports"][gf]) is not None
         )
- 
+
         if not name:
             continue
- 
+
         # Parse status
         status = None
         if status_obj and isinstance(status_obj, dict):
             status = status_obj.get("name")
         elif isinstance(status_obj, str):
             status = status_obj
- 
+
         # Skip students with non-active statuses (Not moving forward, SPAM, Dropped out, Paused, etc.)
         if status not in INCLUDED_STATUSES:
             continue
- 
+
         # Determine if graduate
         is_graduate = status == GRADUATE_STATUS
- 
+
         # Get institution
         institution_ids = get_field_value(rec, FIELDS["students_reports"]["institution"]) or []
         institution_name = None
@@ -373,7 +427,7 @@ def main():
             if inst_id in institutions_lookup:
                 institution_name = institutions_lookup[inst_id]["name"]
                 institutions_set.add(institution_name)
- 
+
         # Get teams
         teams = []
         for team_id in teams_ids:
@@ -381,28 +435,29 @@ def main():
                 team_name = contribution_areas_lookup[team_id]["name"]
                 teams.append(team_name)
                 team_distribution[team_name] = team_distribution.get(team_name, 0) + 1
- 
+
         # Get cohort
         cohort = get_cohort_from_date(internship_end_date)
- 
-        # Get field of study (cross-reference with Students table)
+
+        # Get field of study (cross-reference with Students table, normalized matching)
         field_of_study = None
-        if name in students_by_name:
-            student_rec = students_by_name[name]
+        name_normalized = " ".join(name.strip().lower().split()) if name else ""
+        if name_normalized in students_by_name:
+            student_rec = students_by_name[name_normalized]
             fos_obj = get_field_value(student_rec, FIELDS["students"]["field_of_study"])
             if fos_obj and isinstance(fos_obj, dict):
                 field_of_study = fos_obj.get("name")
             elif isinstance(fos_obj, str):
                 field_of_study = fos_obj
- 
+
         # Count statistics
         if is_graduate:
             graduate_count += 1
         else:
             active_count += 1
- 
+
         total_hours += hours
- 
+
         # Track field of study stats
         if field_of_study:
             if field_of_study not in field_of_study_stats:
@@ -411,7 +466,7 @@ def main():
                 field_of_study_stats[field_of_study]["graduated"] += 1
             else:
                 field_of_study_stats[field_of_study]["active"] += 1
- 
+
         student_data = {
             "name": title_case(name),
             "status": status,
@@ -426,15 +481,47 @@ def main():
             "cohort": cohort,
         }
         students.append(student_data)
- 
+
     # Sort students by name
     students.sort(key=lambda s: s["name"])
- 
+
+    # Fetch translation stats from WordPress.org profiles
+    print("Fetching translation stats from WordPress.org profiles...", file=sys.stderr)
+    translation_totals_agg = {"suggested": 0, "translated": 0, "reviewed": 0, "total": 0}
+    profiles_fetched = 0
+    for student in students:
+        wp_username = student.get("wp_username")
+        if wp_username:
+            stats = fetch_translation_stats(wp_username)
+            # Throttle to avoid rate limiting (200ms between requests)
+            profiles_fetched += 1
+            if profiles_fetched % 5 == 0:
+                time.sleep(1)
+            else:
+                time.sleep(0.2)
+        else:
+            stats = {"suggested": 0, "translated": 0, "reviewed": 0, "total": 0}
+
+        student["suggested"] = stats["suggested"]
+        student["translated"] = stats["translated"]
+        student["reviewed"] = stats["reviewed"]
+        student["total_strings"] = stats["total"]
+
+        translation_totals_agg["suggested"] += stats["suggested"]
+        translation_totals_agg["translated"] += stats["translated"]
+        translation_totals_agg["reviewed"] += stats["reviewed"]
+        translation_totals_agg["total"] += stats["total"]
+
+        if stats["total"] > 0:
+            print(f"  {wp_username}: {stats['total']} strings ({stats['suggested']}s/{stats['translated']}t/{stats['reviewed']}r)", file=sys.stderr)
+
+    print(f"Translation totals: {translation_totals_agg['total']} strings from {profiles_fetched} profiles", file=sys.stderr)
+
     # Process mentors
     mentors = []
     active_mentors = 0
     mentor_countries = {}
- 
+
     for rec in mentors_records:
         name = get_field_value(rec, FIELDS["mentors"]["full_name"])
         status_obj = get_field_value(rec, FIELDS["mentors"]["status"])
@@ -444,35 +531,35 @@ def main():
         student_report_ids = get_field_value(rec, FIELDS["mentors"]["student_reports"]) or []
         sponsored_obj = get_field_value(rec, FIELDS["mentors"]["sponsored"])
         sponsor_company = get_field_value(rec, FIELDS["mentors"]["sponsor_company"])
- 
+
         if not name:
             continue
- 
+
         # Parse status
         status = None
         if status_obj and isinstance(status_obj, dict):
             status = status_obj.get("name")
         elif isinstance(status_obj, str):
             status = status_obj
- 
+
         # Only include Active or Verified mentors
         if status not in ["Active", "Verified"]:
             continue
- 
+
         active_mentors += 1
- 
+
         # Track mentor country
         country_normalized = title_case(country) if country else None
         if country_normalized:
             mentor_countries[country_normalized] = mentor_countries.get(country_normalized, 0) + 1
- 
+
         # Resolve languages
         languages = []
         for lang_id in languages_ids:
             if lang_id in languages_lookup:
                 lang_name = languages_lookup[lang_id]["name"]
                 languages.append(lang_name)
- 
+
         # Resolve student reports to get student names
         active_students = []
         grad_students = []
@@ -485,7 +572,7 @@ def main():
                     wp_user = extract_wp_username(wp_prof)
                     sr_status = get_field_value(sr, FIELDS["students_reports"]["status"])
                     sr_is_grad = sr_status == "Graduate" if isinstance(sr_status, dict) else sr_status == "Graduate"
- 
+
                     if student_name:
                         student_entry = {
                             "name": title_case(student_name),
@@ -496,19 +583,19 @@ def main():
                         else:
                             active_students.append(student_entry)
                     break
- 
+
         # Parse sponsored
         sponsored = False
         if sponsored_obj and isinstance(sponsored_obj, dict):
             sponsored = sponsored_obj.get("name") == "Yes"
         elif isinstance(sponsored_obj, str):
             sponsored = sponsored_obj == "Yes"
- 
+
         # Get sponsor companies
         companies = []
         if sponsor_company:
             companies.append(sponsor_company)
- 
+
         mentor_data = {
             "name": title_case(name),
             "country_normalized": country_normalized,
@@ -524,10 +611,10 @@ def main():
             "companies": companies,
         }
         mentors.append(mentor_data)
- 
+
     # Sort mentors by name
     mentors.sort(key=lambda m: m["name"])
- 
+
     # Count unique sponsor companies from Active/Verified mentors
     sponsor_companies = set()
     for rec in mentors_records:
@@ -537,10 +624,10 @@ def main():
             m_status = m_status_obj.get("name")
         elif isinstance(m_status_obj, str):
             m_status = m_status_obj
- 
+
         if m_status not in ["Active", "Verified"]:
             continue
- 
+
         affiliated = get_field_value(rec, FIELDS["mentors"]["affiliated_company"]) or []
         if isinstance(affiliated, list):
             for company in affiliated:
@@ -548,13 +635,13 @@ def main():
                     sponsor_companies.add(company)
                 elif isinstance(company, dict) and "id" in company:
                     sponsor_companies.add(company["id"])
- 
+
     # Build global stats
     global_stats = {
         "activeStudents": active_count,
         "graduates": graduate_count,
         "totalHours": round(total_hours),
-        "partnerInstitutions": len(institutions_set),
+        "partnerInstitutions": len(confirmed_institutions),
         "sponsorCount": len(sponsor_companies),
         "activeMentors": active_mentors,
         "teamDistribution": team_distribution,
@@ -563,56 +650,50 @@ def main():
         "mentorCountries": mentor_countries,
         "fieldOfStudy": field_of_study_stats,
     }
- 
-    # TODO: integrate translation data source
-    translation_totals = {
-        "suggested": 0,
-        "translated": 0,
-        "reviewed": 0,
-        "total": 0,
-    }
- 
+
+    # Translation totals from WordPress.org profile scraping
+    translation_totals = translation_totals_agg
+
     # Build final data blob
     data_blob = {
         "global": global_stats,
         "translationTotals": translation_totals,
-        "institutions": sorted(institutions_set),
+        "institutions": sorted(confirmed_institutions),
         "students": students,
         "mentors": mentors,
     }
- 
+
     print(f"Built dashboard with {len(students)} students and {len(mentors)} mentors", file=sys.stderr)
- 
+
     # Read template and inject data
     script_dir = Path(__file__).parent
     template_path = script_dir / "template.html"
     output_path = script_dir.parent / "index.html"
- 
+
     if not template_path.exists():
         raise FileNotFoundError(f"Template not found: {template_path}")
- 
+
     with open(template_path, "r") as f:
         template_content = f.read()
- 
+
     # Replace placeholders
     data_json = json.dumps(data_blob, separators=(",", ":"), ensure_ascii=False)
     inst_markers_json = json.dumps(INST_MARKERS, separators=(",", ":"), ensure_ascii=False)
- 
+
     output_content = template_content.replace("/*DATA_BLOB*/", data_json)
     output_content = output_content.replace("/*INST_MARKERS*/", inst_markers_json)
- 
+
     # Write output
     with open(output_path, "w") as f:
         f.write(output_content)
- 
+
     print(f"Dashboard written to {output_path}", file=sys.stderr)
     return 0
- 
- 
+
+
 if __name__ == "__main__":
     try:
         sys.exit(main())
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
- 
