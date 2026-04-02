@@ -79,7 +79,7 @@ FIELDS = {
 
 # Institution markers (hardcoded, won't change often)
 INST_MARKERS = [
-    {"city": "Pisa", "country": "Italy", "lat": 43.7228, "lng": 10.4017, "institutions": ["Università di Pisa"]},
+    {"city": "Pisa", "country": "Italy", "lat": 43.7228, "lng": 10.4017, "institutions": ["UniversitÃ  di Pisa"]},
     {"city": "Dhaka", "country": "Bangladesh", "lat": 23.8103, "lng": 90.4125, "institutions": ["Ahmad's Education"]},
     {"city": "Toledo", "country": "Spain", "lat": 39.8628, "lng": -4.0273, "institutions": ["IES Azarquiel"]},
     {"city": "Madrid", "country": "Spain", "lat": 40.4168, "lng": -3.7038, "institutions": ["Creative Campus - Universidad Europea"]},
@@ -89,15 +89,15 @@ INST_MARKERS = [
     {"city": "La Paz", "country": "Bolivia", "lat": -16.5000, "lng": -68.1193, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
     {"city": "Santa Cruz de la Sierra", "country": "Bolivia", "lat": -17.7833, "lng": -63.1822, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
     {"city": "El Alto", "country": "Bolivia", "lat": -16.5100, "lng": -68.1600, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
-    {"city": "San José", "country": "Costa Rica", "lat": 9.9281, "lng": -84.0907, "institutions": ["Universidad Fidélitas"]},
-    {"city": "Kraków", "country": "Poland", "lat": 50.0647, "lng": 19.9450, "institutions": ["Krakow University of Economics"]},
-    {"city": "Vilanova i la Geltrú", "country": "Spain", "lat": 41.2242, "lng": 1.7257, "institutions": ["Creative Campus - Universidad Europea"]},
+    {"city": "San JosÃ©", "country": "Costa Rica", "lat": 9.9281, "lng": -84.0907, "institutions": ["Universidad FidÃ©litas"]},
+    {"city": "KrakÃ³w", "country": "Poland", "lat": 50.0647, "lng": 19.9450, "institutions": ["Krakow University of Economics"]},
+    {"city": "Vilanova i la GeltrÃº", "country": "Spain", "lat": 41.2242, "lng": 1.7257, "institutions": ["Creative Campus - Universidad Europea"]},
     {"city": "Valencia", "country": "Spain", "lat": 39.4699, "lng": -0.3763, "institutions": ["Creative Campus - Universidad Europea"]},
     {"city": "Tenerife", "country": "Spain", "lat": 28.2916, "lng": -16.6291, "institutions": ["Creative Campus - Universidad Europea"]},
     {"city": "Alcobendas", "country": "Spain", "lat": 40.5475, "lng": -3.6419, "institutions": ["Creative Campus - Universidad Europea"]},
     {"city": "Ahmedabad", "country": "India", "lat": 23.0225, "lng": 72.5714, "institutions": ["Ahmad's Education"]},
     {"city": "Split", "country": "Croatia", "lat": 43.5081, "lng": 16.4402, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Poznań", "country": "Poland", "lat": 52.4064, "lng": 16.9252, "institutions": ["Krakow University of Economics"]},
+    {"city": "PoznaÅ", "country": "Poland", "lat": 52.4064, "lng": 16.9252, "institutions": ["Krakow University of Economics"]},
     {"city": "Hemet", "country": "United States", "lat": 33.7476, "lng": -116.9719, "institutions": ["Central New Mexico Community College"]}
 ]
 
@@ -114,7 +114,7 @@ def fetch_all_records(base_id, table_id, field_ids, pat):
     """Fetch all records from Airtable table with pagination."""
     url = f"{API_URL}/{base_id}/{table_id}"
     headers = {"Authorization": f"Bearer {pat}"}
-    params = {"fields[]": field_ids, "pageSize": 100}
+    params = {"fields[]": field_ids, "returnFieldsByFieldId": "true", "pageSize": 100}
 
     all_records = []
     offset = None
@@ -188,19 +188,19 @@ def get_cohort_from_date(date_str):
     except (ValueError, IndexError):
         return None
 
-    # Winter: Dec 21 - Mar 19 (year of end of range, so Mar = same year)
+    # Winter: Dec 21 â Mar 19 (year of end of range, so Mar = same year)
     if month >= 12 or month <= 3:
         if month == 12:
             return f"Winter {year + 1}"
         else:
             return f"Winter {year}"
-    # Spring: Mar 20 - Jun 20
+    # Spring: Mar 20 â Jun 20
     elif 3 <= month <= 6:
         return f"Spring {year}"
-    # Summer: Jun 21 - Sep 21
+    # Summer: Jun 21 â Sep 21
     elif 6 <= month <= 9:
         return f"Summer {year}"
-    # Fall: Sep 22 - Dec 20
+    # Fall: Sep 22 â Dec 20
     elif 9 <= month <= 12:
         return f"Fall {year}"
 
