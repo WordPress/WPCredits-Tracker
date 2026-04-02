@@ -39,6 +39,18 @@ FIELDS = {
         "internship_end_date": "fldLwLXupWurmimc7",
         "lessons": "fldE1rkXbTWJe8bBq",
         "mentor": "fldSBTwMgno8ecQ2X",
+        # Learn course grade fields (non-empty = completed)
+        "grade_open_source": "fld8OJCdWSIvt31ay",
+        "grade_decisions": "fldo4NPCj2kyRvgiZ",
+        "grade_etiquette": "fldER6s99C6hxxwg9",
+        "grade_voice": "fld8Utsr9D5roQYo0",
+        "grade_conflict": "fldwKJ8RlnXB0nytX",
+        "grade_beginner_user": "fldTNFxjYdNligmj5",
+        "grade_intermediate_user": "fldqcMjyR2jtdmxyZ",
+        "grade_advanced_user": "fldKK2MJbLClz6MUv",
+        "grade_beginner_dev": "fldGJ9A04aH2UWxTt",
+        "grade_intermediate_theme": "fldy56jmos6xu9FvR",
+        "grade_beginner_designer": "fldsxMTOWSK0QUlVS",
     },
     "students": {
         "full_name": "fldvGRKcyRBACeX9t",
@@ -323,6 +335,19 @@ def main():
         lessons_ids = get_field_value(rec, FIELDS["students_reports"]["lessons"]) or []
         teams_ids = get_field_value(rec, FIELDS["students_reports"]["teams"]) or []
  
+        # Count completed Learn courses from grade columns (non-empty = completed)
+        grade_fields = [
+            "grade_open_source", "grade_decisions", "grade_etiquette",
+            "grade_voice", "grade_conflict", "grade_beginner_user",
+            "grade_intermediate_user", "grade_advanced_user",
+            "grade_beginner_dev", "grade_intermediate_theme",
+            "grade_beginner_designer",
+        ]
+        completed_courses = sum(
+            1 for gf in grade_fields
+            if get_field_value(rec, FIELDS["students_reports"][gf]) is not None
+        )
+ 
         if not name:
             continue
  
@@ -396,7 +421,7 @@ def main():
             "wp_profile": wp_profile,
             "wp_username": extract_wp_username(wp_profile),
             "is_graduate": is_graduate,
-            "courses": len(lessons_ids),
+            "courses": completed_courses + (1 if is_graduate else 0),  # +1 for WP Credits course
             "fieldOfStudy": field_of_study,
             "cohort": cohort,
         }
