@@ -519,7 +519,9 @@ def main():
         affiliated = get_field_value(rec, FIELDS["mentors"]["affiliated_company"]) or []
         if isinstance(affiliated, list):
             for company in affiliated:
-                if isinstance(company, dict) and "id" in company:
+                if isinstance(company, str):
+                    sponsor_companies.add(company)
+                elif isinstance(company, dict) and "id" in company:
                     sponsor_companies.add(company["id"])
  
     # Build global stats
