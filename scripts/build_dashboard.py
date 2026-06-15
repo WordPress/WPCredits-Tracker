@@ -28,6 +28,7 @@ TABLES = {
     "contribution_areas": "tblUBEXiS3QKUCXHf",
     "countries": "tbltB7GSRoTtSi4Ps",
     "lessons": "tblGYMK0VpwMv3Bsy",
+    "feedback": "tblx3TH6fp4edQJDm",
 }
 
 # Field IDs
@@ -100,6 +101,15 @@ FIELDS = {
         "f3_impact": "fld5idMQUwwpiljWf",
         "f3_recommend": "fldKXSzK5zkGRe8OC",
         "f3_keep": "fld4yTcZWUxdYiiiz",
+    },
+    # Student feedback (student-linked layer). Aggregate, experience-only.
+    "feedback": {
+        "ease": "fldn7M6U4xXurEgJ2",          # rating 1-5
+        "satisfaction": "fldJPTEix369b8NOw",   # rating 1-5
+        "impact": "fldxtEUsunNgjyKXV",         # rating 1-5
+        "confidence": "fldgnTd61qnS22D81",     # select (asked at the mid-program form)
+        "recommend": "fldZXbvOTIGad6r90",      # select: likely / neither / unlikely
+        "keep": "fld8RZMdCLYKtwcLN",           # select: likely / neither / unlikely
     },
 }
 
@@ -400,6 +410,10 @@ def main():
     lessons_records = fetch_all_records(
         BASE_ID, TABLES["lessons"],
         list(FIELDS["lessons"].values()), pat
+    )
+    feedback_records = fetch_all_records(
+        BASE_ID, TABLES["feedback"],
+        list(FIELDS["feedback"].values()), pat
     )
 
     print(f"Fetched {len(students_reports_records)} student reports", file=sys.stderr)
@@ -806,6 +820,47 @@ def main():
             m = m + 1 if m < 12 else 1
             y = y if m != 1 else y + 1
 
+    # --- Student feedback (aggregate, experience-only; no individuals) ---
+    def _rating_avg(field):
+        vals = [get_field_value(r, FIELDS["feedback"][field]) for r in feedback_records]
+        vals = [v for v in vals if isinstance(v, (int, float))]
+        return {"avg": round(sum(vals) / len(vals), 1), "n": len(vals)} if vals else {"avg": None, "n": 0}
+
+    def _pct_positive(field, positive_keys):
+        keys = [status_key(get_field_value(r, FIELDS["feedback"][field])) for r in feedback_records]
+        keys = [k for k in keys if k]
+        if not keys:
+            return {"pct": None, "n": 0}
+        pos = sum(1 for k in keys if k in positive_keys)
+        return {"pct": round(100 * pos / len(keys)), "n": len(keys)}
+
+    # Confidence distribution over the four real options (junk options ignored).
+    CONF_LABELS = {
+        "very confident": "Very confident",
+        "confident": "Confident",
+        "neutral": "Neutral",
+        "not very confident": "Not very confident",
+    }
+    conf_counts = {label: 0 for label in CONF_LABELS.values()}
+    conf_n = 0
+    for r in feedback_records:
+        k = status_key(get_field_value(r, FIELDS["feedback"]["confidence"]))
+        if k in CONF_LABELS:
+            conf_counts[CONF_LABELS[k]] += 1
+            conf_n += 1
+
+    feedback = {
+        "responses": len(feedback_records),
+        "ratings": {
+            "ease": _rating_avg("ease"),
+            "satisfaction": _rating_avg("satisfaction"),
+            "impact": _rating_avg("impact"),
+        },
+        "recommend": _pct_positive("recommend", {"likely"}),
+        "keep": _pct_positive("keep", {"likely"}),
+        "confidence": {"dist": conf_counts, "n": conf_n},
+    }
+
     # Build global stats
     global_stats = {
         "activeStudents": active_count,
@@ -840,6 +895,7 @@ def main():
         "institutions": sorted(confirmed_institutions),
         "cohorts": cohorts_list,
         "growth": growth,
+        "feedback": feedback,
         "students": students,
         "mentors": mentors,
     }
