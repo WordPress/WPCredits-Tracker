@@ -262,9 +262,12 @@ function tc(name){return TEAM_COLORS[name]||'#546e7a';}
     <div class="cards">
       <div class="card"><div class="num" id="ovActive">${g.activeStudents}</div><div class="lbl">Active Students</div></div>
       <div class="card"><div class="num">${g.graduates}</div><div class="lbl">Graduates</div></div>
+      <div class="card"><div class="num">${g.dropouts!=null?g.dropouts:'—'}</div><div class="lbl">Dropped Out</div></div>
       <div class="card"><div class="num">${g.totalHours.toLocaleString()}</div><div class="lbl">Contribution Hours</div></div>
       <div class="card"><div class="num">${g.partnerInstitutions}</div><div class="lbl">Institutions</div></div>
+      <div class="card"><div class="num">${Object.keys(g.instCountries||{}).length}</div><div class="lbl">Countries</div></div>
       <div class="card"><div class="num">${g.activeMentors}</div><div class="lbl">Active Mentors</div></div>
+      <div class="card"><div class="num">${g.vettedMentors!=null?g.vettedMentors:'—'}</div><div class="lbl">Vetted Mentors</div></div>
       <div class="card"><div class="num">${g.sponsorCount}</div><div class="lbl">Sponsors</div></div>
       <div class="card"><div class="num">${g.totalCourses.toLocaleString()}</div><div class="lbl">Learn Courses Completed</div></div>
     </div>
