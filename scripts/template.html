@@ -15,6 +15,7 @@
 <meta name="twitter:description" content="Live dashboard tracking WordPress Credits program: students, mentors, institutions, contributions, and translation activity.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{--wp-blue:#0073aa;--wp-blue-dark:#005a87;--wp-green:#00a32a;--wp-orange:#dba617;--wp-red:#d63638;--bg:#f0f0f1;--card-bg:#fff;--text:#1d2327;--text-light:#646970;--border:#c3c4c7;--row-hover:#f6f7f7}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -265,6 +266,15 @@ function tc(name){return TEAM_COLORS[name]||'#546e7a';}
       <div class="card"><div class="num">${g.sponsorCount}</div><div class="lbl">Sponsors</div></div>
       <div class="card"><div class="num">${g.totalCourses.toLocaleString()}</div><div class="lbl">Learn Courses Completed</div></div>
     </div>
+    <div class="chart-container">
+      <h3>Growth Over Time</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:8px;font-size:12px;color:var(--text-light)">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75"></span>Joined</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD"></span>Graduated</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:3px;background:#D85A30;display:inline-block"></span>Cumulative joined</span>
+      </div>
+      <div style="position:relative;height:320px"><canvas id="growthChart"></canvas></div>
+    </div>
     <div class="charts-row">
       <div class="chart-container"><h3>Students by Contribution Team</h3><div class="bar-chart" id="teamChart"></div></div>
       <div class="chart-container"><h3>Students by Field of Study</h3><div id="fosChart"></div></div>
@@ -272,6 +282,22 @@ function tc(name){return TEAM_COLORS[name]||'#546e7a';}
 
     <div class="chart-container"><h3>Institutions Around the World</h3><div id="instMap"></div></div>
   `;
+  // Growth over time (joining vs graduating, by month)
+  (function(){
+    var gr = D.growth, cv = document.getElementById('growthChart');
+    if (!gr || !cv || !gr.months || !gr.months.length || typeof Chart === 'undefined') return;
+    new Chart(cv, {
+      data: { labels: gr.months, datasets: [
+        { type:'bar', label:'Joined', data:gr.joined, backgroundColor:'#1D9E75', yAxisID:'y' },
+        { type:'bar', label:'Graduated', data:gr.graduated, backgroundColor:'#378ADD', yAxisID:'y' },
+        { type:'line', label:'Cumulative joined', data:gr.cumulativeJoined, borderColor:'#D85A30', backgroundColor:'#D85A30', borderWidth:2, tension:0.3, pointRadius:2, yAxisID:'y1' }
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+        scales:{ x:{ grid:{ display:false }, ticks:{ autoSkip:true, maxRotation:45, minRotation:45 } },
+          y:{ beginAtZero:true, title:{ display:true, text:'per month' } },
+          y1:{ position:'right', beginAtZero:true, grid:{ drawOnChartArea:false }, title:{ display:true, text:'cumulative' } } } }
+    });
+  })();
   // Team chart
   const teams = Object.entries(g.teamDistribution).sort((a,b) => b[1]-a[1]);
   const mx = teams[0]?teams[0][1]:1;
