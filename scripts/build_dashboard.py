@@ -80,6 +80,7 @@ FIELDS = {
     },
     "sponsors": {
         "company_name": "fldezMq2OBVeqn0DK",
+        "status": "fld4woELctFTrNzNa",
     },
     "languages": {
         "name": "flducizfXx3Lz4cid",
@@ -191,41 +192,75 @@ def extract_wp_username(url):
     return None
 
 
+SEASON_ORDER = {"Winter": 0, "Spring": 1, "Summer": 2, "Fall": 3}
+
+
 def get_cohort_from_date(date_str):
-    """Determine cohort (Winter/Spring/Summer/Fall) from internship end date."""
+    """Determine cohort (Winter/Spring/Summer/Fall) from internship end date.
+
+    Uses (month, day) boundaries for the northern-hemisphere seasons. Winter
+    spans the year boundary and is named for the year it ends in (so an end
+    date in Dec 2025 and one in Feb 2026 both fall in "Winter 2026").
+    """
     if not date_str:
         return None
 
     try:
-        # Parse date: YYYY-MM-DD
-        month = int(date_str.split("-")[1])
-        year = int(date_str.split("-")[0])
+        # Parse date: YYYY-MM-DD (day optional)
+        parts = date_str.split("-")
+        year = int(parts[0])
+        month = int(parts[1])
+        day = int(parts[2]) if len(parts) > 2 else 15
     except (ValueError, IndexError):
         return None
 
-    # Winter: Dec 21 – Mar 19 (year of end of range, so Mar = same year)
-    if month >= 12 or month <= 3:
-        if month == 12:
-            return f"Winter {year + 1}"
-        else:
-            return f"Winter {year}"
+    md = (month, day)
+    # Winter: Dec 21 – Mar 19
+    if md >= (12, 21) or md <= (3, 19):
+        return f"Winter {year + 1}" if month == 12 else f"Winter {year}"
     # Spring: Mar 20 – Jun 20
-    elif 3 <= month <= 6:
+    elif md <= (6, 20):
         return f"Spring {year}"
     # Summer: Jun 21 – Sep 21
-    elif 6 <= month <= 9:
+    elif md <= (9, 21):
         return f"Summer {year}"
     # Fall: Sep 22 – Dec 20
-    elif 9 <= month <= 12:
-        return f"Fall {year}"
+    return f"Fall {year}"
 
-    return None
+
+def cohort_sort_key(cohort):
+    """Sort key so cohorts order chronologically (year, then season)."""
+    try:
+        season, yr = cohort.rsplit(" ", 1)
+        return (int(yr), SEASON_ORDER.get(season, 99))
+    except (ValueError, AttributeError):
+        return (9999, 99)
 
 
 def get_field_value(record, field_id):
     """Safely get field value from Airtable record."""
     fields = record.get("fields", {})
     return fields.get(field_id)
+
+
+def select_name(value):
+    """Extract the display name from a single-select value (dict or str)."""
+    if isinstance(value, dict):
+        return value.get("name")
+    return value
+
+
+def status_key(value):
+    """Normalize a select value for tolerant comparison (trim + casefold).
+
+    This lets cosmetic Airtable renames (extra whitespace or capitalization
+    changes) not silently break the build's status/stage matching. Compare
+    against keys produced by this same function. Returns None when empty.
+    """
+    name = select_name(value)
+    if not isinstance(name, str):
+        return None
+    return name.strip().casefold()
 
 
 def fetch_translation_stats(wp_username):
@@ -317,16 +352,10 @@ def main():
     for rec in institutions_records:
         inst_id = rec["id"]
         name = get_field_value(rec, FIELDS["institutions"]["name"])
-        stage_obj = get_field_value(rec, FIELDS["institutions"]["current_stage"])
-        # Parse singleSelect field
-        stage = None
-        if stage_obj and isinstance(stage_obj, dict):
-            stage = stage_obj.get("name")
-        elif isinstance(stage_obj, str):
-            stage = stage_obj
+        stage = select_name(get_field_value(rec, FIELDS["institutions"]["current_stage"]))
         if name:
             institutions_lookup[inst_id] = {"name": title_case(name), "stage": stage}
-            if stage == "Confirmed":
+            if status_key(stage) == "confirmed":
                 confirmed_institutions.add(title_case(name))
 
     sponsors_lookup = {}
@@ -365,10 +394,21 @@ def main():
             normalized = " ".join(name.strip().lower().split())
             students_by_name[normalized] = rec
 
-    # Statuses that count as real participants
-    ACTIVE_STATUSES = {"In Sensei", "In Sensei Self-onboarding", "Pending graduation"}
+    # Statuses that count as real participants. NOTE: keep this in sync with the
+    # `activeStatuses` set in scripts/template.html.
+    ACTIVE_STATUSES = {
+        "In Sensei",
+        "In Sensei Self-onboarding",
+        "In Sensei 50h",
+        "Pending graduation",
+    }
     GRADUATE_STATUS = "Graduate"
     INCLUDED_STATUSES = ACTIVE_STATUSES | {GRADUATE_STATUS}
+    # Normalized keys for tolerant matching (see status_key()).
+    INCLUDED_STATUS_KEYS = {status_key(s) for s in INCLUDED_STATUSES}
+    GRADUATE_STATUS_KEY = status_key(GRADUATE_STATUS)
+    DROPOUT_KEY = status_key("Dropped out")
+    NOT_MOVING_FORWARD_KEY = status_key("Not moving forward")
 
     # Process students
     students = []
@@ -376,6 +416,8 @@ def main():
     team_distribution = {}
     active_count = 0
     graduate_count = 0
+    dropout_count = 0
+    not_moving_forward_count = 0
     total_hours = 0
     field_of_study_stats = {}
     country_from_mentor = {}  # Track which students have which country via mentor
@@ -405,19 +447,25 @@ def main():
         if not name:
             continue
 
-        # Parse status
-        status = None
-        if status_obj and isinstance(status_obj, dict):
-            status = status_obj.get("name")
-        elif isinstance(status_obj, str):
-            status = status_obj
+        # Parse status (keep original for display; normalized key for matching)
+        status = select_name(status_obj)
+        status_n = status_key(status_obj)
+
+        # Tally exits before filtering them out. These are kept distinct:
+        #  - "Dropped out" = student started the program and then left (a true dropout).
+        #  - "Not moving forward" = expressed interest or was added by a teacher but
+        #    never actually started; NOT a dropout.
+        if status_n == DROPOUT_KEY:
+            dropout_count += 1
+        elif status_n == NOT_MOVING_FORWARD_KEY:
+            not_moving_forward_count += 1
 
         # Skip students with non-active statuses (Not moving forward, SPAM, Dropped out, Paused, etc.)
-        if status not in INCLUDED_STATUSES:
+        if status_n not in INCLUDED_STATUS_KEYS:
             continue
 
         # Determine if graduate
-        is_graduate = status == GRADUATE_STATUS
+        is_graduate = status_n == GRADUATE_STATUS_KEY
 
         # Get institution
         institution_ids = get_field_value(rec, FIELDS["students_reports"]["institution"]) or []
@@ -520,12 +568,13 @@ def main():
     # Process mentors
     mentors = []
     active_mentors = 0
+    vetted_mentors = 0  # Vetted but not yet active (pipeline)
     mentor_countries = {}
 
     for rec in mentors_records:
         name = get_field_value(rec, FIELDS["mentors"]["full_name"])
         status_obj = get_field_value(rec, FIELDS["mentors"]["status"])
-        country = get_field_value(rec, FIELDS["mentors"]["country"])
+        country_ids = get_field_value(rec, FIELDS["mentors"]["country"]) or []
         wp_profile = get_field_value(rec, FIELDS["mentors"]["wp_profile"])
         languages_ids = get_field_value(rec, FIELDS["mentors"]["languages"]) or []
         student_report_ids = get_field_value(rec, FIELDS["mentors"]["student_reports"]) or []
@@ -535,23 +584,28 @@ def main():
         if not name:
             continue
 
-        # Parse status
-        status = None
-        if status_obj and isinstance(status_obj, dict):
-            status = status_obj.get("name")
-        elif isinstance(status_obj, str):
-            status = status_obj
+        # Parse status (normalized key for tolerant matching)
+        status_n = status_key(status_obj)
 
-        # Only include Active or Verified mentors
-        if status not in ["Active", "Verified"]:
+        # Count vetted-but-not-yet-active mentors as a separate pipeline metric.
+        if status_n == status_key("Vetted - positive"):
+            vetted_mentors += 1
+
+        # Only include currently-active mentors in the displayed list/count.
+        if status_n != status_key("Active"):
             continue
 
         active_mentors += 1
 
-        # Track mentor country
-        country_normalized = title_case(country) if country else None
-        if country_normalized:
-            mentor_countries[country_normalized] = mentor_countries.get(country_normalized, 0) + 1
+        # Resolve linked Countries records to names (a mentor may span several).
+        countries = [
+            countries_lookup[cid]["name"]
+            for cid in country_ids
+            if cid in countries_lookup
+        ]
+        country_normalized = ", ".join(countries) if countries else None
+        for cname in countries:
+            mentor_countries[cname] = mentor_countries.get(cname, 0) + 1
 
         # Resolve languages
         languages = []
@@ -571,7 +625,7 @@ def main():
                     wp_prof = get_field_value(sr, FIELDS["students_reports"]["wp_profile"])
                     wp_user = extract_wp_username(wp_prof)
                     sr_status = get_field_value(sr, FIELDS["students_reports"]["status"])
-                    sr_is_grad = sr_status == "Graduate" if isinstance(sr_status, dict) else sr_status == "Graduate"
+                    sr_is_grad = status_key(sr_status) == status_key("Graduate")
 
                     if student_name:
                         student_entry = {
@@ -585,11 +639,7 @@ def main():
                     break
 
         # Parse sponsored
-        sponsored = False
-        if sponsored_obj and isinstance(sponsored_obj, dict):
-            sponsored = sponsored_obj.get("name") == "Yes"
-        elif isinstance(sponsored_obj, str):
-            sponsored = sponsored_obj == "Yes"
+        sponsored = status_key(sponsored_obj) == status_key("Yes")
 
         # Get sponsor companies
         companies = []
@@ -599,7 +649,7 @@ def main():
         mentor_data = {
             "name": title_case(name),
             "country_normalized": country_normalized,
-            "country": country,
+            "country": country_normalized,
             "wp_profile": wp_profile,
             "wp_username": extract_wp_username(wp_profile),
             "languages": languages,
@@ -615,38 +665,37 @@ def main():
     # Sort mentors by name
     mentors.sort(key=lambda m: m["name"])
 
-    # Count unique sponsor companies from Active/Verified mentors
-    sponsor_companies = set()
-    for rec in mentors_records:
-        m_status_obj = get_field_value(rec, FIELDS["mentors"]["status"])
-        m_status = None
-        if m_status_obj and isinstance(m_status_obj, dict):
-            m_status = m_status_obj.get("name")
-        elif isinstance(m_status_obj, str):
-            m_status = m_status_obj
+    # Count approved sponsors from the Sponsors table (the source of truth).
+    approved_sponsors = 0
+    for rec in sponsors_records:
+        if status_key(get_field_value(rec, FIELDS["sponsors"]["status"])) == status_key("Approved"):
+            approved_sponsors += 1
 
-        if m_status not in ["Active", "Verified"]:
+    # Count confirmed partner institutions by country (resolved via Countries table).
+    inst_countries = {}
+    for rec in institutions_records:
+        if status_key(get_field_value(rec, FIELDS["institutions"]["current_stage"])) != "confirmed":
             continue
-
-        affiliated = get_field_value(rec, FIELDS["mentors"]["affiliated_company"]) or []
-        if isinstance(affiliated, list):
-            for company in affiliated:
-                if isinstance(company, str):
-                    sponsor_companies.add(company)
-                elif isinstance(company, dict) and "id" in company:
-                    sponsor_companies.add(company["id"])
+        country_ids = get_field_value(rec, FIELDS["institutions"]["country"]) or []
+        for cid in country_ids:
+            if cid in countries_lookup:
+                cname = countries_lookup[cid]["name"]
+                inst_countries[cname] = inst_countries.get(cname, 0) + 1
 
     # Build global stats
     global_stats = {
         "activeStudents": active_count,
         "graduates": graduate_count,
+        "dropouts": dropout_count,
+        "notMovingForward": not_moving_forward_count,
         "totalHours": round(total_hours),
         "partnerInstitutions": len(confirmed_institutions),
-        "sponsorCount": len(sponsor_companies),
+        "sponsorCount": approved_sponsors,
         "activeMentors": active_mentors,
+        "vettedMentors": vetted_mentors,
         "teamDistribution": team_distribution,
         "totalCourses": sum(s["courses"] for s in students),
-        "instCountries": {},  # Will populate from institutions
+        "instCountries": inst_countries,
         "mentorCountries": mentor_countries,
         "fieldOfStudy": field_of_study_stats,
     }
@@ -654,11 +703,18 @@ def main():
     # Translation totals from WordPress.org profile scraping
     translation_totals = translation_totals_agg
 
+    # Sorted, chronological list of cohorts for the filter dropdowns.
+    cohorts_list = sorted(
+        {s["cohort"] for s in students if s.get("cohort")},
+        key=cohort_sort_key,
+    )
+
     # Build final data blob
     data_blob = {
         "global": global_stats,
         "translationTotals": translation_totals,
         "institutions": sorted(confirmed_institutions),
+        "cohorts": cohorts_list,
         "students": students,
         "mentors": mentors,
     }
