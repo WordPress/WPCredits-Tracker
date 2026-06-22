@@ -113,28 +113,32 @@ FIELDS = {
     },
 }
 
-# Institution markers (hardcoded, won't change often)
+# Partner institution map markers, grouped by city. Coordinates geocoded from
+# city + country (one-time). Keep in sync with the partner list; if this grows
+# often, consider moving locations into Airtable and building markers from there.
 INST_MARKERS = [
-    {"city": "Pisa", "country": "Italy", "lat": 43.7228, "lng": 10.4017, "institutions": ["Università di Pisa"]},
-    {"city": "Dhaka", "country": "Bangladesh", "lat": 23.8103, "lng": 90.4125, "institutions": ["Ahmad's Education"]},
-    {"city": "Toledo", "country": "Spain", "lat": 39.8628, "lng": -4.0273, "institutions": ["IES Azarquiel"]},
-    {"city": "Madrid", "country": "Spain", "lat": 40.4168, "lng": -3.7038, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Albuquerque", "country": "United States", "lat": 35.0844, "lng": -106.6504, "institutions": ["Central New Mexico Community College"]},
-    {"city": "Riga", "country": "Latvia", "lat": 56.9496, "lng": 24.1052, "institutions": ["Riga Nordic University"]},
-    {"city": "Cochabamba", "country": "Bolivia", "lat": -17.3895, "lng": -66.1568, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
-    {"city": "La Paz", "country": "Bolivia", "lat": -16.5000, "lng": -68.1193, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
-    {"city": "Santa Cruz de la Sierra", "country": "Bolivia", "lat": -17.7833, "lng": -63.1822, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
-    {"city": "El Alto", "country": "Bolivia", "lat": -16.5100, "lng": -68.1600, "institutions": ["Universidad Privada Franz Tamayo (UNIFRANZ)"]},
-    {"city": "San José", "country": "Costa Rica", "lat": 9.9281, "lng": -84.0907, "institutions": ["Universidad Fidélitas"]},
-    {"city": "Kraków", "country": "Poland", "lat": 50.0647, "lng": 19.9450, "institutions": ["Krakow University of Economics"]},
-    {"city": "Vilanova i la Geltrú", "country": "Spain", "lat": 41.2242, "lng": 1.7257, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Valencia", "country": "Spain", "lat": 39.4699, "lng": -0.3763, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Tenerife", "country": "Spain", "lat": 28.2916, "lng": -16.6291, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Alcobendas", "country": "Spain", "lat": 40.5475, "lng": -3.6419, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Ahmedabad", "country": "India", "lat": 23.0225, "lng": 72.5714, "institutions": ["Ahmad's Education"]},
-    {"city": "Split", "country": "Croatia", "lat": 43.5081, "lng": 16.4402, "institutions": ["Creative Campus - Universidad Europea"]},
-    {"city": "Poznań", "country": "Poland", "lat": 52.4064, "lng": 16.9252, "institutions": ["Krakow University of Economics"]},
-    {"city": "Hemet", "country": "United States", "lat": 33.7476, "lng": -116.9719, "institutions": ["Central New Mexico Community College"]}
+    {"city": "Dhaka", "country": "Bangladesh", "lat": 23.7644, "lng": 90.389, "institutions": ["Ahmad's Education"]},
+    {"city": "Pisa", "country": "Italy", "lat": 43.4715, "lng": 10.6798, "institutions": ["Università di Pisa"]},
+    {"city": "San José", "country": "Costa Rica", "lat": 9.9328, "lng": -84.0796, "institutions": ["Universidad Fidélitas"]},
+    {"city": "Cartago", "country": "Costa Rica", "lat": 9.8157, "lng": -83.6944, "institutions": ["Liceo HHC Experimental Bilingue José Figueres Ferrer"]},
+    {"city": "Albuquerque", "country": "United States", "lat": 35.0841, "lng": -106.651, "institutions": ["Central New Mexico Community College"]},
+    {"city": "Madison", "country": "United States", "lat": 40.7598, "lng": -74.4171, "institutions": ["Drew University"]},
+    {"city": "Riga", "country": "Latvia", "lat": 56.9494, "lng": 24.1052, "institutions": ["Riga Nordic University"]},
+    {"city": "Santa Cruz de la Sierra", "country": "Bolivia", "lat": -17.7834, "lng": -63.1821, "institutions": ["Universidad Privada Franz Tamayo"]},
+    {"city": "Cochabamba", "country": "Bolivia", "lat": -17.4012, "lng": -66.1676, "institutions": ["Universidad Privada Franz Tamayo"]},
+    {"city": "Kraków", "country": "Poland", "lat": 50.0619, "lng": 19.9369, "institutions": ["Krakow University of Economics", "Cracow University of Technology"]},
+    {"city": "Toledo", "country": "Spain", "lat": 39.8559, "lng": -4.0243, "institutions": ["IES Azarquiel", "Escuela de Arte Toledo"]},
+    {"city": "Madrid", "country": "Spain", "lat": 40.4168, "lng": -3.7035, "institutions": ["Creative Campus - Universidad Europea", "Universidad de Diseño Innovación y Tecnología - UDIT"]},
+    {"city": "Zaragoza", "country": "Spain", "lat": 41.6916, "lng": -0.9101, "institutions": ["Escuela de Arte de Zaragoza", "Zaragoza Dinámica"]},
+    {"city": "Huesca", "country": "Spain", "lat": 42.1361, "lng": -0.0298, "institutions": ["Escuela de Arte de Huesca"]},
+    {"city": "Estepona", "country": "Spain", "lat": 36.4268, "lng": -5.1468, "institutions": ["Instituto de Educación Secundaria Mar de Alborán"]},
+    {"city": "Salamanca", "country": "Spain", "lat": 40.9652, "lng": -5.664, "institutions": ["IES Venancio Blanco"]},
+    {"city": "A Coruña", "country": "Spain", "lat": 43.3466, "lng": -8.4127, "institutions": ["CPR Liceo La Paz"]},
+    {"city": "Kolhapur", "country": "India", "lat": 16.7028, "lng": 74.2405, "institutions": ["D Y Patil Agriculture and Technical University, Talsande, Kolhapur"]},
+    {"city": "Kolkata", "country": "India", "lat": 22.5726, "lng": 88.3639, "institutions": ["ERAP Research and Learning LLP"]},
+    {"city": "Pula", "country": "Croatia", "lat": 44.8702, "lng": 13.8455, "institutions": ["Juraj Dobrila University of Pula"]},
+    {"city": "Kampala", "country": "Uganda", "lat": 0.3177, "lng": 32.5814, "institutions": ["E-zone School of Computing"]},
+    {"city": "Helsinki", "country": "Finland", "lat": 60.1666, "lng": 24.9435, "institutions": ["Haaga-Helia University of Applied Sciences"]},
 ]
 
 
