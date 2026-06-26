@@ -903,15 +903,9 @@ def main():
         key=cohort_sort_key,
     )
 
-    # Friendly "Data as of" date for the dashboard trust footer (portable, no
-    # platform-specific strftime padding flags).
-    today = date.today()
-    last_updated = today.strftime("%B ") + str(today.day) + today.strftime(", %Y")
-
     # Build final data blob
     data_blob = {
         "global": global_stats,
-        "lastUpdated": last_updated,
         "translationTotals": translation_totals,
         "institutions": sorted(confirmed_institutions),
         "cohorts": cohorts_list,
