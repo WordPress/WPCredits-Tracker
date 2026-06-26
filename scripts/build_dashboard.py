@@ -35,6 +35,7 @@ TABLES = {
 FIELDS = {
     "students_reports": {
         "name": "fldyXVlkChJaO9Q47",
+        "email": "fldGfPd4fF9lxAXYI",
         "status": "fldCMdqqJGAUQ9nbV",
         "institution": "fldRqJlE4nwZQR3QO",
         "hours": "fld7msftOzCxAG5E3",
@@ -59,6 +60,7 @@ FIELDS = {
     },
     "students": {
         "full_name": "fldvGRKcyRBACeX9t",
+        "email": "fldIj9twnzJ0oISpy",
         "field_of_study": "fldwVUA9HZUhZFxJL",
         "internship_end_date": "fld6DQEFvDcaM9PuZ",
         "wp_profile": "fldqZWsRYplXlc8E4",
@@ -462,13 +464,20 @@ def main():
         if name:
             countries_lookup[country_id] = {"name": title_case(name)}
 
-    # Build students mapping (normalized name -> record) for cross-reference
+    # Build students mappings for field-of-study cross-reference. Email is the
+    # reliable join key (the two tables store names in different formats — e.g.
+    # "Erick Marin Monge" vs "MARIN MONGE ERICK BERNARDO"), so we match on email
+    # first and fall back to normalized name.
     students_by_name = {}
+    students_by_email = {}
     for rec in students_records:
         name = get_field_value(rec, FIELDS["students"]["full_name"])
         if name:
             normalized = " ".join(name.strip().lower().split())
             students_by_name[normalized] = rec
+        email = get_field_value(rec, FIELDS["students"]["email"])
+        if email:
+            students_by_email[email.strip().lower()] = rec
 
     # Statuses that count as real participants. NOTE: keep this in sync with the
     # `activeStatuses` set in scripts/template.html.
@@ -563,11 +572,14 @@ def main():
         # Get cohort
         cohort = get_cohort_from_date(internship_end_date)
 
-        # Get field of study (cross-reference with Students table, normalized matching)
+        # Get field of study (cross-reference with Students table). Match on email
+        # first (reliable), then fall back to normalized name.
         field_of_study = None
+        report_email = get_field_value(rec, FIELDS["students_reports"]["email"])
+        email_key = report_email.strip().lower() if report_email else ""
         name_normalized = " ".join(name.strip().lower().split()) if name else ""
-        if name_normalized in students_by_name:
-            student_rec = students_by_name[name_normalized]
+        student_rec = students_by_email.get(email_key) or students_by_name.get(name_normalized)
+        if student_rec:
             fos_obj = get_field_value(student_rec, FIELDS["students"]["field_of_study"])
             if fos_obj and isinstance(fos_obj, dict):
                 field_of_study = fos_obj.get("name")
