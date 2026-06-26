@@ -89,6 +89,12 @@ tbody tr:last-child td{border-bottom:none}
 .leaflet-popup-content ul{margin:0;padding:0 0 0 16px}
 .leaflet-popup-content li{margin:2px 0;color:var(--text)}
 .footer{text-align:center;padding:20px;color:var(--text-light);font-size:12px}
+.sponsors{border-top:1px solid var(--border);margin-top:8px;padding:28px 24px;text-align:center}
+.sponsors-label{font-size:13px;color:var(--text-light);margin-bottom:18px}
+.sponsors-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:30px 36px}
+.sponsors-row a{display:inline-flex;align-items:center}
+.sponsors-row img{max-height:34px;max-width:140px;width:auto;object-fit:contain;opacity:.6;filter:grayscale(100%);transition:opacity .15s ease,filter .15s ease}
+.sponsors-row a:hover img{opacity:1;filter:none}
 @media(max-width:768px){.nav{overflow-x:auto}.nav-item{padding:10px 14px;font-size:13px}.content{padding:16px}.bar-label{width:80px;font-size:11px}}
 </style>
 </head>
@@ -110,6 +116,22 @@ tbody tr:last-child td{border-bottom:none}
   <div class="section" id="sec-learn"></div>
   <div class="section" id="sec-mentors"></div>
   <div class="section" id="sec-feedback"></div>
+</div>
+<div class="sponsors">
+  <div class="sponsors-label">Made possible by</div>
+  <div class="sponsors-row">
+    <a href="https://wordpress.com" target="_blank" rel="noopener noreferrer" title="WordPress.com"><img src="assets/sponsors/wordpresscom.png" alt="WordPress.com" loading="lazy"></a>
+    <a href="https://automattic.com" target="_blank" rel="noopener noreferrer" title="Automattic"><img src="assets/sponsors/automattic.png" alt="Automattic" loading="lazy"></a>
+    <a href="https://www.dreamhost.com" target="_blank" rel="noopener noreferrer" title="DreamHost"><img src="assets/sponsors/dreamhost.png" alt="DreamHost" loading="lazy"></a>
+    <a href="https://www.hostinger.com/" target="_blank" rel="noopener noreferrer" title="Hostinger"><img src="assets/sponsors/hostinger.png" alt="Hostinger" loading="lazy"></a>
+    <a href="https://elementor.com/" target="_blank" rel="noopener noreferrer" title="Elementor"><img src="assets/sponsors/elementor.png" alt="Elementor" loading="lazy"></a>
+    <a href="https://wpbakery.com" target="_blank" rel="noopener noreferrer" title="WPBakery"><img src="assets/sponsors/wpbakery.png" alt="WPBakery" loading="lazy"></a>
+    <a href="https://www.weglot.com" target="_blank" rel="noopener noreferrer" title="Weglot"><img src="assets/sponsors/weglot.png" alt="Weglot" loading="lazy"></a>
+    <a href="https://hosting.com/" target="_blank" rel="noopener noreferrer" title="hosting.com"><img src="assets/sponsors/hosting-com.png" alt="hosting.com" loading="lazy"></a>
+    <a href="https://raiolanetworks.com" target="_blank" rel="noopener noreferrer" title="Raiola Networks"><img src="assets/sponsors/raiola-networks.png" alt="Raiola Networks" loading="lazy"></a>
+    <a href="https://www.smarthost.pl/" target="_blank" rel="noopener noreferrer" title="Smarthost"><img src="assets/sponsors/smarthost.jpg" alt="Smarthost" loading="lazy"></a>
+    <a href="https://www.villasostaga.it/it/" target="_blank" rel="noopener noreferrer" title="Villa Sostaga"><img src="assets/sponsors/villa-sostaga.jpg" alt="Villa Sostaga" loading="lazy"></a>
+  </div>
 </div>
 <div class="footer">Data sourced from Airtable &amp; WordPress.org profiles &bull; The dashboard refreshes once a week &mdash; every Monday at 6:00 UTC</div>
 <script>
