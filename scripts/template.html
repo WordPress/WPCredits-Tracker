@@ -41,7 +41,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubunt
 .act-label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-light);margin:32px 0 14px}
 .act-label:first-child{margin-top:0}
 .card .act-sub{font-size:11px;color:var(--text-light);margin-top:6px}
-.trust-footer{font-size:12px;color:var(--text-light);border-top:1px solid var(--border);margin-top:4px;padding-top:16px}
 .bar-chart{display:flex;flex-direction:column;gap:10px}
 .bar-row{display:flex;align-items:center;gap:12px}
 .bar-label{width:130px;text-align:right;font-size:13px;font-weight:500;color:var(--text);flex-shrink:0}
@@ -300,7 +299,6 @@ function tc(name){return TEAM_COLORS[name]||'#546e7a';}
   const fb = D.feedback || {};
   const recPct = (fb.recommend && fb.recommend.pct != null) ? fb.recommend.pct + '%' : '—';
   const keepPct = (fb.keep && fb.keep.pct != null) ? fb.keep.pct + '%' : '—';
-  const updated = D.lastUpdated || '';
   el.innerHTML = `
     <div class="act-label">Scale &amp; momentum</div>
     <div class="cards">
@@ -335,8 +333,6 @@ function tc(name){return TEAM_COLORS[name]||'#546e7a';}
       <div class="card"><div class="num">${keepPct}</div><div class="lbl">Keep Contributing</div></div>
     </div>
     <div class="chart-container"><h3>Who's joining us</h3><div class="chart-sub">The academic backgrounds students bring</div><div id="fosChart"></div></div>
-
-    <div class="trust-footer">Data as of ${updated} &middot; sourced from Airtable and WordPress.org &middot; updated weekly</div>
   `;
   // Growth over time (joining vs graduating, by month)
   (function(){
