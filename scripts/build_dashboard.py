@@ -73,7 +73,6 @@ FIELDS = {
         "student_reports": "fldnbYOM2vHPwJjpg",
         "sponsored": "fldFypFl2gQkUszXn",
         "sponsor_company": "fldtdhRzXWpfcb13w",
-        "affiliated_company": "flde2iNU183R2CYXa",
     },
     "institutions": {
         "name": "fldZQBu7XS2Z29jx4",
