@@ -32,6 +32,20 @@ class WPCPM_Airtable {
 	const PAGE_SIZE = 100;
 
 	/**
+	 * Where the last schema read is kept for the track editor's line.
+	 *
+	 * @var string
+	 */
+	const SCHEMA_TRANSIENT = 'wpcpm_airtable_schema';
+
+	/**
+	 * How long that copy serves before the editor reads the base again: fifteen minutes.
+	 *
+	 * @var int
+	 */
+	const SCHEMA_TTL = 900;
+
+	/**
 	 * The shape of an Airtable record ID: `rec` and fourteen alphanumerics.
 	 *
 	 * Held on the client because it is a fact about Airtable, and every module that stores,
@@ -463,7 +477,53 @@ class WPCPM_Airtable {
 			);
 		}
 
+		// Every successful read refills the copy the editor draws from, so the preflight, the
+		// run's re-read and the mentors sync keep it current without being asked to (the
+		// design's decision 24). Nothing reads it back but `cached_schema()`.
+		set_transient(
+			self::SCHEMA_TRANSIENT,
+			array(
+				'read'   => time(),
+				'schema' => $schema,
+			),
+			self::SCHEMA_TTL
+		);
+
 		return $schema;
+	}
+
+	/**
+	 * The schema as it was last read, when that was recent, or a fresh read.
+	 *
+	 * For the line at the top of the track editor and nothing else: a screen somebody opens many
+	 * times an hour cannot wait on Airtable each time, and the number it shows is advice. The
+	 * publish screen's preflight keeps calling `fetch_schema()`, because the number that decides
+	 * what gets created in the base is never a cached one (the design's decision 24).
+	 *
+	 * @return array|WP_Error `schema` as `fetch_schema()` returns it and `age` in seconds, 0 for
+	 *                        a read made now; or the error a fresh read failed with when nothing
+	 *                        recent is held.
+	 */
+	public function cached_schema() {
+		$held = get_transient( self::SCHEMA_TRANSIENT );
+
+		if ( is_array( $held ) && isset( $held['read'], $held['schema'] ) && is_array( $held['schema'] ) ) {
+			return array(
+				'schema' => $held['schema'],
+				'age'    => max( 0, time() - (int) $held['read'] ),
+			);
+		}
+
+		$schema = $this->fetch_schema();
+
+		if ( is_wp_error( $schema ) ) {
+			return $schema;
+		}
+
+		return array(
+			'schema' => $schema,
+			'age'    => 0,
+		);
 	}
 
 	/**

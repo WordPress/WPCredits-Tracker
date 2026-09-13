@@ -72,6 +72,26 @@ ck( 'an absent field is the fallback', WPCPM_Request::posted_verbatim( 'missing'
 ck( 'the lines variant trims each line and drops the empty ones', WPCPM_Request::posted_verbatim_lines( 'lines' ), "A-1\nB%202" );
 ck( 'and its absent field is the fallback too', WPCPM_Request::posted_verbatim_lines( 'missing', 'none' ), 'none' );
 
+echo "\n=== posted_exact() and exact(): an Airtable column name is never trimmed ===\n";
+
+// A column name is the question's key, verbatim, and an Airtable name can end in a space (the
+// design's 4.2): the base's own `Company ` does. posted_verbatim() trims, and a column typed with
+// its space would silently become a different column (T3a).
+$_POST = array( 'column' => 'Company ', 'control' => "AB\x07C", 'tagged' => 'a <b>', 'slashed' => "It\\'s" );
+$_GET  = array( 'column' => ' Slack name ', 'tagged' => 'a <b>' );
+
+ck( 'a posted column name keeps its trailing space', WPCPM_Request::posted_exact( 'column' ), 'Company ' );
+ck( 'a control character is still dropped', WPCPM_Request::posted_exact( 'control' ), 'ABC' );
+ck( 'a tag is kept, because a name is matched and escaped, never rendered raw', WPCPM_Request::posted_exact( 'tagged' ), 'a <b>' );
+ck( 'and it is unslashed like every other reader', WPCPM_Request::posted_exact( 'slashed' ), "It's" );
+ck( 'an absent field is the fallback', WPCPM_Request::posted_exact( 'missing', 'none' ), 'none' );
+ck( 'posted_verbatim() still trims, so the two are not the same reader', WPCPM_Request::posted_verbatim( 'column' ), 'Company' );
+ck( 'the query argument keeps both its spaces, where text() would trim them', array( WPCPM_Request::exact( 'column' ), WPCPM_Request::text( 'column' ) ), array( ' Slack name ', 'Slack name' ) );
+ck( 'and keeps a tag, where text() strips it', array( WPCPM_Request::exact( 'tagged' ), WPCPM_Request::text( 'tagged' ) ), array( 'a <b>', 'a' ) );
+ck( 'an absent argument is the fallback', WPCPM_Request::exact( 'missing', 'none' ), 'none' );
+$_POST = array();
+$_GET  = array();
+
 echo "\n=== posted_list(): a ticked list, each value whole or not at all ===\n";
 
 $_POST = array(

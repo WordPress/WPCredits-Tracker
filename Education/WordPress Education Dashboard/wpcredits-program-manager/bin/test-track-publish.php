@@ -56,6 +56,10 @@ class WPCPM_Track_Store {
 	public static function source( $post_id ) { return self::$sources[ $post_id ] ?? 'definition'; }
 	public static function php_differences( $post_id, array $definition ) { return self::$php_diffs[ $post_id ] ?? array(); }
 
+	public static $states = array();
+
+	public static function state( $post_id ) { return self::$states[ $post_id ] ?? 'draft'; }
+
 	public static $unpublished = array();
 
 	public static function publish( $post_id, $user_id = 0 ) {
@@ -266,6 +270,27 @@ WPCPM_Airtable::$schema    = base( array( 'What you did' => 'formula' ), array( 
 ck( 'a computed column is refused: a student\'s answer sent to one is thrown away',
     codes( WPCPM_Track_Publish::preflight( 7 )['refusals'] ), array( 'column_computed' ) );
 
+// A single select already in the base must offer every choice the question does: Airtable's API
+// cannot add one (decision 26), so the refusal names the absent choices for somebody to add.
+WPCPM_Airtable::$schema = base( array( 'What you did' => 'multilineText' ), array( 'Marketing Track' ) );
+WPCPM_Airtable::$schema['tblReports']['columns']['Tool used'] = array( 'type' => 'singleSelect', 'options' => array( 'choices' => array( array( 'name' => 'MAAMP' ) ) ) );
+WPCPM_Track_Store::$definitions[7]['questions']['Tool used'] = array( 'label' => 'The tool you used', 'type' => 'select', 'group' => 'project', 'options' => array( 'MAAMP', 'Local', 'Studio' ) );
+
+$choices_flight = WPCPM_Track_Publish::preflight( 7 );
+
+ck( 'a select whose column lacks some of its choices is refused, and the refusal names them in the question\'s order',
+    array( codes( $choices_flight['refusals'] ), $choices_flight['refusals'][0]['column'], false !== strpos( $choices_flight['refusals'][0]['message'], 'Local, Studio' ), false !== strpos( $choices_flight['refusals'][0]['message'], 'cannot add a choice' ) ),
+    array( array( 'column_missing_choices' ), 'Tool used', true, true ) );
+
+WPCPM_Airtable::$schema['tblReports']['columns']['Tool used']['options']['choices'][] = array( 'name' => 'Local' );
+WPCPM_Airtable::$schema['tblReports']['columns']['Tool used']['options']['choices'][] = array( 'name' => 'Studio' );
+
+ck( 'and once the base offers them all, the column is ready',
+    array( codes( WPCPM_Track_Publish::preflight( 7 )['refusals'] ), in_array( 'Tool used', WPCPM_Track_Publish::preflight( 7 )['columns']['ready'], true ) ),
+    array( array(), true ) );
+
+unset( WPCPM_Track_Store::$definitions[7]['questions']['Tool used'] );
+
 WPCPM_Airtable::$schema = base( array( 'What you did' => 'multipleRecordLinks' ), array( 'Marketing Track' ) );
 
 ck( 'so is a link column that is not Main Contribution Team, which would reach into another table',
@@ -275,6 +300,21 @@ WPCPM_Airtable::$schema = base( array( 'What you did' => 'singleLineText' ), arr
 
 ck( 'and a column of the wrong type, which would take the wrong shape of answer',
     codes( WPCPM_Track_Publish::preflight( 7 )['refusals'] ), array( 'column_type_mismatch' ) );
+
+echo "\n=== A trashed track is refused before the base is read ===\n";
+
+WPCPM_Airtable::$schema = base( array( 'What you did' => 'multilineText' ) );
+WPCPM_Track_Store::$states[7] = 'trash';
+$reads_before = WPCPM_Airtable::$reads;
+$trashed      = WPCPM_Track_Publish::preflight( 7 );
+WPCPM_Track_Store::$states = array();
+
+ck( 'a track in the trash is refused as that, and the schema is not read for it',
+    array( codes( $trashed['refusals'] ), WPCPM_Airtable::$reads - $reads_before ),
+    array( array( 'track_trashed' ), 0 ) );
+
+ck( 'and once it is not, the same track preflights as before',
+    codes( WPCPM_Track_Publish::preflight( 7 )['refusals'] ), array() );
 
 echo "\n=== The ceiling, which Airtable enforces part-way through ===\n";
 

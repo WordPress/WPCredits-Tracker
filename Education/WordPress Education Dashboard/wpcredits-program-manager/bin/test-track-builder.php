@@ -23,6 +23,7 @@ define( 'WPCPM_VERSION', 'test' );
 function __( $s, $d = null ) { return $s; }
 function esc_html( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
 function esc_attr( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
+function esc_textarea( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
 function esc_url( $s ) { return (string) $s; }
 function esc_url_raw( $s ) { return (string) $s; }
 function esc_html__( $s, $d = null ) { return esc_html( $s ); }
@@ -32,11 +33,20 @@ function _n( $a, $b, $n, $d = null ) { return 1 === (int) $n ? $a : $b; }
 function number_format_i18n( $n ) { return (string) $n; }
 function wp_date( $f, $t = null ) { return gmdate( $f, null === $t ? time() : $t ); }
 function admin_url( $path = '' ) { return 'https://example.test/wp-admin/' . $path; }
-function add_query_arg( $key, $value, $url ) { return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . rawurlencode( $key ) . '=' . rawurlencode( $value ); }
+// Faithful to core in the one way that matters here: a value is inserted as it is handed and
+// never encoded (core says the caller encodes), so a handler that forgets to encode a column
+// name fails the check with & and + below rather than passing against a stand-in that encoded
+// for it (the Task 5 review). Both forms core accepts.
+function add_query_arg( $key, $value = null, $url = null ) {
+	if ( is_array( $key ) ) { $args = $key; $url = (string) $value; } else { $args = array( $key => $value ); $url = (string) $url; }
+	foreach ( $args as $k => $v ) { $url .= ( false === strpos( $url, '?' ) ? '?' : '&' ) . $k . '=' . $v; }
+	return $url;
+}
 function wp_nonce_field( $action ) { echo '<input type="hidden" name="_wpnonce" value="' . esc_attr( $action ) . '" />'; }
 function current_user_can( $cap ) { return ! empty( $GLOBALS['can_manage'] ); }
 function check_admin_referer( $action ) { if ( ( $GLOBALS['nonce'] ?? '' ) !== $action ) { throw new DieSignal( 'the nonce was refused' ); } return true; }
 function wp_safe_redirect( $url ) { throw new RedirectSignal( (string) $url ); }
+function wp_send_json_success( $data ) { throw new JsonSignal( json_encode( array( 'success' => true, 'data' => $data ) ) ); }
 function wp_die( $message = '', $title = '', $args = array() ) { throw new DieSignal( is_string( $message ) ? $message : '' ); }
 function is_wp_error( $thing ) { return $thing instanceof WP_Error; }
 function add_action( $hook, $callback, $priority = 10, $args = 1 ) { $GLOBALS['hooks'][] = $hook; return true; }
@@ -44,9 +54,14 @@ function get_current_user_id() { return 5; }
 function get_userdata( $id ) { return isset( $GLOBALS['users'][ (int) $id ] ) ? (object) array( 'display_name' => $GLOBALS['users'][ (int) $id ] ) : false; }
 function get_option( $k, $d = false ) { return array_key_exists( $k, $GLOBALS['opts'] ) ? $GLOBALS['opts'][ $k ] : $d; }
 function wp_enqueue_style( $handle, $src = '', $deps = array() ) { $GLOBALS['enqueued'][] = array( 'style', $handle, $deps ); }
+function wp_enqueue_script( $handle, $src = '', $deps = array(), $ver = false, $footer = false ) { $GLOBALS['enqueued'][] = array( 'script', $handle, $deps, $footer ); }
+// Faithful to core's esc_js(): markup and double quotes are encoded before the quotes are
+// escaped, so a track name with a tag in it cannot break out of the attribute it sits in.
+function esc_js( $s ) { $s = htmlspecialchars( (string) $s, ENT_COMPAT ); $s = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $s ); return str_replace( "\n", '\\n', addslashes( str_replace( "\r", '', $s ) ) ); }
 
 class RedirectSignal extends Exception {}
 class DieSignal extends Exception {}
+class JsonSignal extends Exception {}
 
 class WP_Error {
 	private $code;
@@ -59,7 +74,16 @@ class WP_Error {
 class WPCPM_Request {
 	public static function posted_id( $key ) { return (int) ( $_POST[ $key ] ?? 0 ); }
 	public static function id( $key ) { return (int) ( $_GET[ $key ] ?? 0 ); }
+	public static function text( $key ) { return isset( $_GET[ $key ] ) ? trim( (string) $_GET[ $key ] ) : ''; }
 	public static function posted_text( $key ) { return isset( $_POST[ $key ] ) ? trim( (string) $_POST[ $key ] ) : ''; }
+	public static function posted_key( $key ) { return isset( $_POST[ $key ] ) ? preg_replace( '/[^a-z0-9_\-]/', '', strtolower( (string) $_POST[ $key ] ) ) : ''; }
+	// Faithful to the real class: posted_verbatim() trims, and only posted_exact() keeps a trailing
+	// space, which is what a column name needs. A handler reading a column through the wrong one
+	// fails the `Company ` checks below (bin/test-request.php holds the real readers to this).
+	public static function posted_verbatim( $key ) { return isset( $_POST[ $key ] ) ? trim( (string) $_POST[ $key ] ) : ''; }
+	public static function posted_exact( $key ) { return isset( $_POST[ $key ] ) ? (string) $_POST[ $key ] : ''; }
+	public static function exact( $key ) { return isset( $_GET[ $key ] ) ? (string) $_GET[ $key ] : ''; }
+	public static function posted_verbatim_lines( $key ) { return isset( $_POST[ $key ] ) ? implode( "\n", array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', (string) $_POST[ $key ] ) ), 'strlen' ) ) : ''; }
 }
 
 class WPCPM_Track_Palette {
@@ -115,10 +139,24 @@ class WPCPM_Track_Publish {
 	}
 }
 
-/** The settings, stood in for the one question the screen asks them. */
+/** The settings, stood in for the two questions the screen asks them. */
 class WPCPM_Settings {
 	public static $schema = true;
+	public static $values = array( 'reports_table' => 'tblReports' );
 	public static function has_schema_token() { return self::$schema; }
+	public static function get() { return self::$values; }
+}
+
+/** The client, stood in for the one call the editor makes: the cached reading, or no base. */
+class WPCPM_Airtable {
+	public static $cached = null;
+	public static $asked  = 0;
+
+	public function cached_schema() {
+		++self::$asked;
+
+		return null === self::$cached ? new WP_Error( 'wpcpm_airtable_error', 'The base could not be read.' ) : self::$cached;
+	}
 }
 
 class WPCPM_Track_Store {
@@ -171,6 +209,51 @@ class WPCPM_Track_Store {
 
 	public static function published( $post_id ) {
 		return self::$tracks[ $post_id ]['published'] ?? null;
+	}
+
+	public static function others( $post_id ) {
+		$others = array();
+
+		foreach ( self::$tracks as $id => $track ) {
+			if ( (int) $id === (int) $post_id ) {
+				continue;
+			}
+
+			$others[] = array(
+				'label'     => $track['definition']['label'] ?? '',
+				'published' => in_array( $track['state'] ?? '', array( 'published', 'changed' ), true ) || 'builtin' === ( $track['source'] ?? '' ),
+				'columns'   => array_map( 'strval', array_keys( $track['definition']['questions'] ?? array() ) ),
+			);
+		}
+
+		return $others;
+	}
+
+	public static function ever_published( $post_id ) {
+		foreach ( self::$tracks[ $post_id ]['log'] ?? array() as $entry ) {
+			if ( 'publish' === ( $entry['did'] ?? '' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static $deleted = array();
+
+	public static function delete( $post_id ) {
+		if ( ! isset( self::$tracks[ $post_id ] ) ) {
+			return new WP_Error( 'wpcpm_track_missing', 'That track does not exist.' );
+		}
+
+		if ( self::ever_published( $post_id ) ) {
+			return new WP_Error( 'wpcpm_track_was_published', 'This track has been published, so it is kept.' );
+		}
+
+		self::$deleted[] = (int) $post_id;
+		unset( self::$tracks[ $post_id ] );
+
+		return (int) $post_id;
 	}
 
 	public static $refreshed  = array();
@@ -242,7 +325,13 @@ class WPCPM_Flash {
 	}
 }
 
+// The real rules, not a stand-in: a stand-in for WPCPM_Track_Questions would let a handler pass
+// against a rule the real class does not hold (T2c's stub-drift findings).
+require_once __DIR__ . '/../includes/tracks/class-wpcpm-track-columns.php';
+require_once __DIR__ . '/../includes/tracks/class-wpcpm-track-questions.php';
 require_once __DIR__ . '/../includes/tools/class-wpcpm-tool.php';
+require_once __DIR__ . '/../includes/tools/class-wpcpm-track-editor.php';
+require_once __DIR__ . '/../includes/tools/class-wpcpm-track-editor-screen.php';
 require_once __DIR__ . '/../includes/tools/class-wpcpm-track-builder-screen.php';
 require_once __DIR__ . '/../includes/tools/class-wpcpm-track-builder.php';
 
@@ -424,19 +513,20 @@ ck( 'and the handler is on admin-post', in_array( 'admin_post_' . WPCPM_Track_Bu
 ck( 'and the assets are hooked to admin_enqueue_scripts', in_array( 'admin_enqueue_scripts', $GLOBALS['hooks'], true ), true );
 
 $tool->enqueue_assets( 'wpcredits-program_page_wpcpm-tool-track-builder' );
-ck( 'its stylesheet builds on the plugin\'s admin sheet, on its own screen', $GLOBALS['enqueued'], array( array( 'style', 'wpcpm-track-builder', array( 'wpcpm-admin' ) ) ) );
+ck( 'its stylesheet builds on the plugin\'s admin sheet, on its own screen, and the question list\'s script rides in the footer (T3a)', $GLOBALS['enqueued'], array( array( 'style', 'wpcpm-track-builder', array( 'wpcpm-admin' ) ), array( 'script', 'wpcpm-track-editor', array(), true ) ) );
 $GLOBALS['enqueued'] = array();
 $tool->enqueue_assets( 'wpcredits-program_page_wpcpm-settings' );
 ck( 'and on no other', $GLOBALS['enqueued'], array() );
 
 echo "\n=== The properties form ===\n";
 
-// The questions are T3's; this edits what a track is, not what it asks. A built-in track its PHP
-// still runs is read-only here, because its equivalence with that PHP is what the switch rests on
-// (spec section 6), and the store refuses the save in any case.
-ck( 'the form offers the track properties, and nothing about its questions',
+// The properties edit what a track is; since T3a the form also carries what it asks, and every
+// other track's columns for the sharing index, so the list under the properties is drawn from one
+// read. A built-in track its PHP still runs is read-only here, because its equivalence with that
+// PHP is what the switch rests on (spec section 6), and the store refuses the save in any case.
+ck( 'the form offers the track properties, then its questions and every other track\'s columns',
     array_keys( WPCPM_Track_Builder::form( 13 ) ),
-    array( 'id', 'label', 'status', 'key', 'course_url', 'learn_course_id', 'hours_target', 'hue', 'read_only' ) );
+    array( 'id', 'label', 'status', 'key', 'course_url', 'learn_course_id', 'hours_target', 'hue', 'read_only', 'questions', 'others', 'schema', 'locked' ) );
 ck( 'filled from the definition', array( WPCPM_Track_Builder::form( 13 )['label'], WPCPM_Track_Builder::form( 13 )['status'], WPCPM_Track_Builder::form( 13 )['read_only'] ), array( 'Marketing Track', 'Marketing Track', false ) );
 ck( 'and a built-in track its PHP runs is read-only', WPCPM_Track_Builder::form( 11 )['read_only'], true );
 
@@ -444,7 +534,8 @@ ob_start();
 WPCPM_Track_Builder_Screen::render_form( array( 'form' => WPCPM_Track_Builder::form( 13 ), 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
 $form = ob_get_clean();
 ck( 'the form posts to the save action with a field per property',
-    array( substr_count( $form, 'name="action" value="wpcpm_track_save"' ), substr_count( $form, 'name="wpcpm_label"' ), substr_count( $form, 'name="wpcpm_status"' ), substr_count( $form, 'name="wpcpm_key"' ), substr_count( $form, 'name="wpcpm_hours_target"' ) ),
+    // By id, since T3a: each add form under the list has a `wpcpm_label` of its own, for the question's words.
+    array( substr_count( $form, 'name="action" value="wpcpm_track_save"' ), substr_count( $form, 'id="wpcpm_label" name="wpcpm_label"' ), substr_count( $form, 'name="wpcpm_status"' ), substr_count( $form, 'name="wpcpm_key"' ), substr_count( $form, 'name="wpcpm_hours_target"' ) ),
     array( 1, 1, 1, 1, 1 ) );
 
 // A refusal flashes what was typed, and the form has to prefer it over the stored value - the
@@ -977,6 +1068,916 @@ ck( 'and one that finds everything in place says so',
 WPCPM_Track_Publish::$answer = null;
 $_POST                       = array();
 
+
+
+echo "\n=== The question editor: its handlers ===\n";
+
+$editor = new WPCPM_Track_Editor( $tool );
+$GLOBALS['hooks'] = array();
+$editor->boot();
+
+ck( 'the editor hooks its five handlers',
+    $GLOBALS['hooks'],
+    array( 'admin_post_wpcpm_question_add', 'admin_post_wpcpm_question_save', 'admin_post_wpcpm_question_move', 'admin_post_wpcpm_question_remove', 'admin_post_wpcpm_track_delete' ) );
+
+/**
+ * Press one of the editor's handlers and report what came of it.
+ *
+ * @param string $method The handler.
+ * @param array  $post   What the form posted.
+ * @return array `redirect`, `die` or `json`, and the detail.
+ */
+function press_editor( $method, array $post ) {
+	global $editor;
+	$_POST = $post;
+	WPCPM_Flash::$set = array();
+
+	try {
+		$editor->$method();
+	} catch ( RedirectSignal $e ) {
+		return array( 'redirect', $e->getMessage(), WPCPM_Flash::$set['track-builder'] ?? array() );
+	} catch ( DieSignal $e ) {
+		return array( 'die', $e->getMessage() );
+	} catch ( JsonSignal $e ) {
+		return array( 'json', json_decode( $e->getMessage(), true ) );
+	}
+
+	return array( 'fell through' );
+}
+
+/** A track of three questions across two groups, a draft of somebody's own. */
+function editable_track() {
+	return array(
+		'definition' => array(
+			'schema_version' => 1,
+			'key'            => 'marketing',
+			'status'         => 'Marketing Track',
+			'label'          => 'Marketing Track',
+			'questions'      => array(
+				'Hours'      => array( 'type' => 'number', 'label' => 'Hours', 'group' => 'hours', 'min' => 0, 'max' => 1000, 'step' => 1, 'airtable_type' => 'number' ),
+				'Slack name' => array( 'type' => 'text', 'label' => 'Your Slack name', 'group' => 'onboarding', 'airtable_type' => 'singleLineText' ),
+				'Your blog'  => array( 'type' => 'url', 'label' => 'Your blog', 'group' => 'onboarding', 'airtable_type' => 'url', 'learn_lesson_id' => 4242 ),
+			),
+		),
+		'state'       => 'draft',
+		'source'      => 'definition',
+		'log'         => array(),
+		'equivalence' => array( 'not_builtin' ),
+		'published'   => null,
+	);
+}
+
+WPCPM_Track_Store::$tracks = array(
+	13 => editable_track(),
+	11 => array(
+		'definition'  => array( 'key' => '150h', 'status' => 'In Sensei', 'label' => '150-hour Track', 'questions' => array( 'Hours' => array( 'type' => 'number' ), 'Slack name' => array( 'type' => 'text' ) ) ),
+		'state'       => 'published',
+		'source'      => 'builtin',
+		'log'         => array( array( 'at' => 1788000000, 'by' => 7, 'did' => 'publish' ) ),
+		'equivalence' => array(),
+		'published'   => array( 'key' => '150h' ),
+	),
+);
+WPCPM_Track_Store::$errors = array();
+WPCPM_Track_Store::$saved  = array();
+
+echo "\n--- capability first, then the nonce, on every handler ---\n";
+
+foreach ( array( 'handle_add', 'handle_save', 'handle_move', 'handle_remove', 'handle_delete' ) as $handler ) {
+	$GLOBALS['can_manage'] = false;
+	$GLOBALS['nonce']      = '';
+	$refused = press_editor( $handler, array( 'track' => 13 ) );
+	$GLOBALS['can_manage'] = true;
+	$nonce_refused = press_editor( $handler, array( 'track' => 13 ) );
+
+	ck( "$handler refuses somebody without the capability before it looks at the nonce, and then a bad nonce",
+	    array( $refused[0], $refused[1], $nonce_refused[0], $nonce_refused[1] ),
+	    array( 'die', 'You do not have permission to manage the program.', 'die', 'the nonce was refused' ) );
+}
+
+echo "\n--- adding ---\n";
+
+$GLOBALS['nonce'] = WPCPM_Track_Editor::ACTION_ADD;
+$added = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Company ', 'wpcpm_label' => 'Where you work', 'wpcpm_type' => 'text', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'a new question lands after the last of its group, with its control, its words, its group and the Airtable type its control implies',
+    array( array_keys( WPCPM_Track_Store::$saved[13]['questions'] ), WPCPM_Track_Store::$saved[13]['questions']['Company '] ),
+    array(
+        array( 'Hours', 'Slack name', 'Your blog', 'Company ' ),
+        array( 'type' => 'text', 'label' => 'Where you work', 'group' => 'onboarding', 'airtable_type' => 'singleLineText' ),
+    ) );
+
+ck( 'and the person is taken to the new question, its column name verbatim',
+    array( $added[0], $added[1], $added[2]['status'] ),
+    array( 'redirect', 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder&wpcpm_track=13&wpcpm_question=Company%20', 'success' ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$ampersand = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Practical: Duplicate & Explore + more', 'wpcpm_label' => 'Two things', 'wpcpm_type' => 'text', 'wpcpm_group' => 'project' ) );
+
+ck( 'a column holding & and + reaches the redirect encoded, so it comes back as the same column',
+    array( $ampersand[2]['status'], substr( $ampersand[1], -strlen( '&wpcpm_question=Practical%3A%20Duplicate%20%26%20Explore%20%2B%20more' ) ) ),
+    array( 'success', '&wpcpm_question=Practical%3A%20Duplicate%20%26%20Explore%20%2B%20more' ) );
+
+WPCPM_Track_Store::$saved = array();
+$dup = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Hours', 'wpcpm_label' => 'Again', 'wpcpm_type' => 'number', 'wpcpm_group' => 'hours' ) );
+
+// Under `question_values`, not `values`: `values` is what the track's own properties are drawn
+// from, and a question's label arriving there renamed the track (the whole-branch review).
+ck( 'a column the track already asks is refused, nothing saved, and what was typed comes back',
+    array( $dup[2]['status'], $dup[2]['question_values']['column'], array_key_exists( 'values', $dup[2] ), WPCPM_Track_Store::$saved ),
+    array( 'error', 'Hours', false, array() ) );
+
+WPCPM_Track_Store::$errors = array( array( 'code' => 'column_reserved', 'message' => 'This column belongs to the syncs.' ) );
+$reserved = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Status', 'wpcpm_label' => 'Your status', 'wpcpm_type' => 'text', 'wpcpm_group' => 'project' ) );
+WPCPM_Track_Store::$errors = array();
+
+ck( 'the store\'s own rules refuse through the same call the publish screen makes',
+    array( $reserved[2]['status'], $reserved[2]['message'], WPCPM_Track_Store::$saved ),
+    array( 'error', 'This column belongs to the syncs.', array() ) );
+
+// The whole definition is checked, so the first refusal may name another question entirely. The
+// key is `where` as `WPCPM_Track_Definition::validate()` writes it, and `column` as
+// `WPCPM_Track_Publish::preflight()` reads it (the whole-branch review).
+WPCPM_Track_Store::$errors = array( array( 'code' => 'label_empty', 'where' => 'Slack name', 'message' => 'The question needs the words a student reads.' ) );
+$named = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Status', 'wpcpm_label' => 'Your status', 'wpcpm_type' => 'text', 'wpcpm_group' => 'project' ) );
+
+WPCPM_Track_Store::$errors = array( array( 'code' => 'label_empty', 'column' => 'Slack name', 'message' => 'The question needs the words a student reads.' ) );
+$named_column = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Status', 'wpcpm_label' => 'Your status', 'wpcpm_type' => 'text', 'wpcpm_group' => 'project' ) );
+WPCPM_Track_Store::$errors = array();
+
+ck( 'a refusal that names a column says which one, so a rule another question tripped is not read as this one\'s',
+    array( $named[2]['message'], $named_column[2]['message'] ),
+    array( 'Slack name: The question needs the words a student reads.', 'Slack name: The question needs the words a student reads.' ) );
+
+$team = press_editor( 'handle_add', array( 'track' => 13, 'wpcpm_column' => 'Main Contribution Team', 'wpcpm_label' => 'Your team', 'wpcpm_type' => 'team', 'wpcpm_group' => 'project' ) );
+
+ck( 'a team question takes the link type, which no other control may',
+    array( $team[2]['status'], WPCPM_Track_Store::$saved[13]['questions']['Main Contribution Team']['airtable_type'] ?? 'not saved' ),
+    array( 'success', 'multipleRecordLinks' ) );
+
+echo "\n--- saving one question ---\n";
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+WPCPM_Track_Store::$saved      = array();
+$GLOBALS['nonce'] = WPCPM_Track_Editor::ACTION_SAVE;
+
+$saved = press_editor( 'handle_save', array(
+	'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_column' => 'Your blog',
+	'wpcpm_type' => 'url', 'wpcpm_label' => 'Your blog, if you have one', 'wpcpm_group' => 'onboarding',
+	'wpcpm_help' => 'The address', 'wpcpm_lead' => 'About you', 'wpcpm_required' => '1', 'wpcpm_hide_from_institution' => '1',
+	'wpcpm_row' => 'links', 'wpcpm_stack' => '1', 'wpcpm_why' => 'Kept short',
+) );
+
+ck( 'every property the control owns is read, the flags only when ticked, and the lesson id is carried through untouched',
+    WPCPM_Track_Store::$saved[13]['questions']['Your blog'],
+    array( 'type' => 'url', 'label' => 'Your blog, if you have one', 'group' => 'onboarding', 'help' => 'The address', 'lead' => 'About you', 'why' => 'Kept short', 'row' => 'links', 'stack' => true, 'required' => true, 'hide_from_institution' => true, 'airtable_type' => 'url', 'learn_lesson_id' => 4242 ) );
+
+ck( 'and the question keeps its place',
+    array_keys( WPCPM_Track_Store::$saved[13]['questions'] ), array( 'Hours', 'Slack name', 'Your blog' ) );
+
+ck( 'a save returns to the track',
+    array( $saved[0], $saved[1], $saved[2]['status'] ),
+    array( 'redirect', 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder&wpcpm_track=13', 'success' ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Hours', 'wpcpm_column' => 'Hours', 'wpcpm_type' => 'number', 'wpcpm_label' => 'Hours', 'wpcpm_group' => 'hours', 'wpcpm_min' => '0', 'wpcpm_max' => '100', 'wpcpm_step' => '0.5' ) );
+
+ck( 'a number reads its bounds as numbers, a step with a point as a float',
+    array( WPCPM_Track_Store::$saved[13]['questions']['Hours']['min'], WPCPM_Track_Store::$saved[13]['questions']['Hours']['max'], WPCPM_Track_Store::$saved[13]['questions']['Hours']['step'] ),
+    array( 0, 100, 0.5 ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack name', 'wpcpm_type' => 'text', 'wpcpm_label' => 'Your Slack name', 'wpcpm_group' => 'onboarding', 'wpcpm_maxlength' => '100' ) );
+
+ck( 'text reads its length limit as a whole number',
+    WPCPM_Track_Store::$saved[13]['questions']['Slack name']['maxlength'], 100 );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_column' => 'Your blog', 'wpcpm_type' => 'select', 'wpcpm_label' => 'Your blog', 'wpcpm_group' => 'onboarding', 'wpcpm_options' => " Yes \r\n\r\nNo\n" ) );
+
+ck( 'a select reads its choices one a line, trimmed, blank lines dropped, and the control change moves the Airtable type with it',
+    array( WPCPM_Track_Store::$saved[13]['questions']['Your blog']['options'], WPCPM_Track_Store::$saved[13]['questions']['Your blog']['airtable_type'] ),
+    array( array( 'Yes', 'No' ), 'singleSelect' ) );
+
+echo "\n--- renaming a column ---\n";
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$renamed = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_column' => 'Your website', 'wpcpm_type' => 'url', 'wpcpm_label' => 'Your blog', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'a question never published may take another column, and keeps its place',
+    array( $renamed[2]['status'], array_keys( WPCPM_Track_Store::$saved[13]['questions'] ) ),
+    array( 'success', array( 'Hours', 'Slack name', 'Your website' ) ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+WPCPM_Track_Store::$saved      = array();
+$onto = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_column' => 'Hours', 'wpcpm_type' => 'url', 'wpcpm_label' => 'Your blog', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'renaming onto another question is refused, back on the question with what was typed',
+    array( $onto[2]['status'], $onto[1], WPCPM_Track_Store::$saved ),
+    array( 'error', 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder&wpcpm_track=13&wpcpm_question=Your%20blog', array() ) );
+
+echo "\n--- forking a shared column ---\n";
+
+// Slack name is shared with the 150-hour Track: rewording keeps it, a control change forks it.
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$reworded = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack name', 'wpcpm_type' => 'text', 'wpcpm_label' => 'Your name in Slack', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'rewording a shared question keeps its column',
+    array( $reworded[2]['status'], array_keys( WPCPM_Track_Store::$saved[13]['questions'] ) ),
+    array( 'success', array( 'Hours', 'Slack name', 'Your blog' ) ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$forked = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack name', 'wpcpm_type' => 'textarea', 'wpcpm_label' => 'Your Slack name', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'changing the control of a shared question gives it a column of its own, named after the track, in the same place',
+    array( array_keys( WPCPM_Track_Store::$saved[13]['questions'] ), WPCPM_Track_Store::$saved[13]['questions']['Slack name - marketing']['airtable_type'] ),
+    array( array( 'Hours', 'Slack name - marketing', 'Your blog' ), 'multilineText' ) );
+
+ck( 'and the message says so, naming the new column',
+    array( $forked[2]['status'], false !== strpos( $forked[2]['message'], 'Slack name - marketing' ) ),
+    array( 'success', true ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Slack name - marketing'] = array( 'type' => 'text', 'label' => 'Taken', 'group' => 'onboarding' );
+WPCPM_Track_Store::$saved = array();
+$collision = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack name', 'wpcpm_type' => 'textarea', 'wpcpm_label' => 'Your Slack name', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'a fork whose name the track already uses is refused rather than overwriting it',
+    array( $collision[2]['status'], WPCPM_Track_Store::$saved ), array( 'error', array() ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$alone = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_column' => 'Your blog', 'wpcpm_type' => 'textarea', 'wpcpm_label' => 'Your blog', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'a question no other track shares just changes its control',
+    array( $alone[2]['status'], array_keys( WPCPM_Track_Store::$saved[13]['questions'] ) ),
+    array( 'success', array( 'Hours', 'Slack name', 'Your blog' ) ) );
+
+echo "\n--- a published question is fixed ---\n";
+
+WPCPM_Track_Store::$tracks[13]              = editable_track();
+WPCPM_Track_Store::$tracks[13]['state']     = 'published';
+WPCPM_Track_Store::$tracks[13]['published'] = array( 'questions' => array( 'Hours' => array(), 'Slack name' => array() ) );
+WPCPM_Track_Store::$saved = array();
+
+$locked_rename = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack handle', 'wpcpm_type' => 'text', 'wpcpm_label' => 'Your Slack name', 'wpcpm_group' => 'onboarding' ) );
+$locked_fork   = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack name', 'wpcpm_type' => 'textarea', 'wpcpm_label' => 'Your Slack name', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'a published question can neither take another column nor fork, and is told to remove and re-add instead',
+    array( $locked_rename[2]['status'], $locked_fork[2]['status'], false !== strpos( $locked_fork[2]['message'], 'remove it and add a new question' ), WPCPM_Track_Store::$saved ),
+    array( 'error', 'error', true, array() ) );
+
+$locked_reword = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_column' => 'Slack name', 'wpcpm_type' => 'text', 'wpcpm_label' => 'Your name in Slack', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'but its wording may still change',
+    array( $locked_reword[2]['status'], WPCPM_Track_Store::$saved[13]['questions']['Slack name']['label'] ),
+    array( 'success', 'Your name in Slack' ) );
+
+$unpublished_one = press_editor( 'handle_save', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_column' => 'Your site', 'wpcpm_type' => 'url', 'wpcpm_label' => 'Your blog', 'wpcpm_group' => 'onboarding' ) );
+
+ck( 'and a question added since the last publish is still free to move column',
+    array( $unpublished_one[2]['status'], array_key_exists( 'Your site', WPCPM_Track_Store::$saved[13]['questions'] ) ),
+    array( 'success', true ) );
+
+echo "\n--- moving ---\n";
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+WPCPM_Track_Store::$saved      = array();
+$GLOBALS['nonce'] = WPCPM_Track_Editor::ACTION_MOVE;
+
+$moved = press_editor( 'handle_move', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_direction' => 'up' ) );
+
+ck( 'a move swaps within the group, saves, and comes back to the track',
+    array( array_keys( WPCPM_Track_Store::$saved[13]['questions'] ), $moved[0], $moved[2]['status'] ),
+    array( array( 'Hours', 'Your blog', 'Slack name' ), 'redirect', 'success' ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+WPCPM_Track_Store::$saved      = array();
+$edge = press_editor( 'handle_move', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_direction' => 'up', 'wpcpm_async' => '1' ) );
+
+ck( 'at the edge nothing is saved, and the page that asked in the background gets the order the store holds',
+    array( WPCPM_Track_Store::$saved, $edge[0], $edge[1]['data']['order'] ),
+    array( array(), 'json', array( 'Hours', 'Slack name', 'Your blog' ) ) );
+
+$async = press_editor( 'handle_move', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_direction' => 'up', 'wpcpm_async' => '1' ) );
+
+ck( 'a background move answers with the new order',
+    $async[1]['data']['order'], array( 'Hours', 'Your blog', 'Slack name' ) );
+
+// Without the script the flash is all a person reads, so it cannot say a row moved when the map
+// came back unchanged (the whole-branch review).
+WPCPM_Track_Store::$tracks[13] = editable_track();
+WPCPM_Track_Store::$saved      = array();
+$edge_page = press_editor( 'handle_move', array( 'track' => 13, 'wpcpm_question' => 'Slack name', 'wpcpm_direction' => 'up' ) );
+
+ck( 'at the edge without the script the message says nothing moved, and still comes back as a success',
+    array( $edge_page[0], $edge_page[2]['status'], $edge_page[2]['message'], WPCPM_Track_Store::$saved ),
+    array( 'redirect', 'success', 'That question is already at the edge of its group, so nothing moved.', array() ) );
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$moved_page = press_editor( 'handle_move', array( 'track' => 13, 'wpcpm_question' => 'Your blog', 'wpcpm_direction' => 'up' ) );
+
+ck( 'and a move that did happen still says so',
+    $moved_page[2]['message'], 'The question was moved.' );
+
+echo "\n--- removing ---\n";
+
+WPCPM_Track_Store::$tracks[13] = editable_track();
+$GLOBALS['nonce'] = WPCPM_Track_Editor::ACTION_REMOVE;
+$removed = press_editor( 'handle_remove', array( 'track' => 13, 'wpcpm_question' => 'Slack name' ) );
+
+ck( 'a removed question leaves the track, and the message says the column and its answers stay in Airtable',
+    array( array_keys( WPCPM_Track_Store::$saved[13]['questions'] ), false !== strpos( $removed[2]['message'], 'stay in Airtable' ) ),
+    array( array( 'Hours', 'Your blog' ), true ) );
+
+WPCPM_Track_Store::$saved = array();
+$gone = press_editor( 'handle_remove', array( 'track' => 13, 'wpcpm_question' => 'Nothing here' ) );
+
+ck( 'a question that is not on the track is refused and nothing is saved',
+    array( $gone[2]['status'], WPCPM_Track_Store::$saved ), array( 'error', array() ) );
+
+echo "\n--- deleting a track ---\n";
+
+$GLOBALS['nonce'] = WPCPM_Track_Editor::ACTION_DELETE;
+WPCPM_Track_Store::$deleted = array();
+$kept = press_editor( 'handle_delete', array( 'track' => 11 ) );
+
+ck( 'a track that was ever published is refused by the store and kept',
+    array( $kept[2]['status'], WPCPM_Track_Store::$deleted, isset( WPCPM_Track_Store::$tracks[11] ) ),
+    array( 'error', array(), true ) );
+
+$deleted = press_editor( 'handle_delete', array( 'track' => 13 ) );
+
+ck( 'a draft never published is deleted, and the list says which one went',
+    array( $deleted[2]['status'], WPCPM_Track_Store::$deleted, $deleted[1], false !== strpos( $deleted[2]['message'], 'Marketing Track was deleted' ) ),
+    array( 'success', array( 13 ), 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', true ) );
+
+
+echo "\n=== The question list under a track's properties ===\n";
+
+WPCPM_Track_Store::$tracks = array(
+	13 => editable_track(),
+	11 => array(
+		'definition'  => array( 'key' => '150h', 'status' => 'In Sensei', 'label' => '150-hour Track', 'questions' => array( 'Hours' => array( 'type' => 'number', 'label' => 'Hours', 'group' => 'hours' ), 'Slack name' => array( 'type' => 'text', 'label' => 'Slack', 'group' => 'onboarding' ) ) ),
+		'state'       => 'published',
+		'source'      => 'builtin',
+		'log'         => array( array( 'at' => 1788000000, 'by' => 7, 'did' => 'publish' ) ),
+		'equivalence' => array(),
+		'published'   => array( 'key' => '150h' ),
+	),
+);
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Slack name - marketing'] = array( 'type' => 'textarea', 'label' => 'Your Slack name, at length', 'group' => 'onboarding' );
+
+$form = WPCPM_Track_Builder::form( 13 );
+
+ck( 'form() carries the questions in order and every other track\'s columns',
+    array( array_keys( $form['questions'] ), array_column( $form['others'], 'label' ) ),
+    array( array( 'Hours', 'Slack name', 'Your blog', 'Slack name - marketing' ), array( '150-hour Track' ) ) );
+
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => $form, 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$list = ob_get_clean();
+
+ck( 'the four groups are drawn in the order the Student Report Card uses, each with its heading',
+    array_map( function ( $m ) { return $m; }, preg_match_all( '/<h3>([^<]+)<\/h3>/', $list, $m ) ? $m[1] : array() ),
+    array( 'Total hours', 'Onboarding', 'Project', 'Wrap-up' ) );
+
+ck( 'a group with nothing in it says so, and still offers Add',
+    array( substr_count( $list, 'No questions in this group.' ), substr_count( $list, 'name="wpcpm_group" value="wrapup"' ) ),
+    array( 2, 1 ) );
+
+preg_match_all( '/<tr class="wpcpm-question" id="wpcpm-question-[a-f0-9]{32}" data-wpcpm-column="([^"]*)" data-wpcpm-group="([^"]*)">/', $list, $rows_found );
+
+ck( 'each row carries its column verbatim and its group, in page order',
+    array( $rows_found[1], $rows_found[2] ),
+    array( array( 'Hours', 'Slack name', 'Your blog', 'Slack name - marketing' ), array( 'hours', 'onboarding', 'onboarding', 'onboarding' ) ) );
+
+ck( 'the words, the column as code, and the control by its name',
+    array(
+        false !== strpos( $list, '<strong>Your Slack name</strong><code class="wpcpm-question__column">Slack name</code>' ),
+        substr_count( $list, '<td>Text, one line</td>' ),
+        substr_count( $list, '<td>Web address</td>' ),
+    ),
+    array( true, 1, 1 ) );
+
+ck( 'a column another track writes says so, naming it, and a fork says what it came from',
+    array(
+        substr_count( $list, 'Shared with 150-hour Track. Rewording keeps the column' ),
+        false !== strpos( $list, 'A column of this track&#039;s own, forked from Slack name.' ),
+        false === strpos( $list, 'Shared with' . ' ' . 'Marketing' ),
+    ),
+    array( 2, true, true ) );
+
+ck( 'each row offers Edit by column name, two arrows in a background-ready form, and Remove behind a confirmation that says what stays in Airtable',
+    array(
+        substr_count( $list, 'wpcpm_question=Slack%20name%20-%20marketing">Edit</a>' ),
+        substr_count( $list, 'class="wpcpm-question__mover" data-wpcpm-refused="The move was not saved. The question is back where it was."' ),
+        substr_count( $list, 'name="wpcpm_direction" value="up"' ),
+        substr_count( $list, 'name="wpcpm_direction" value="down"' ),
+        substr_count( $list, 'onsubmit="return confirm(\'Remove this question from the track? Its column, and whatever students wrote in it, stay in Airtable.\');"' ),
+    ),
+    array( 1, 4, 4, 4, 4 ) );
+
+ck( 'every form carries its own nonce and action',
+    array(
+        substr_count( $list, 'name="_wpnonce" value="wpcpm_question_move"' ),
+        substr_count( $list, 'name="_wpnonce" value="wpcpm_question_remove"' ),
+        substr_count( $list, 'name="_wpnonce" value="wpcpm_question_add"' ),
+        substr_count( $list, 'name="action" value="wpcpm_question_add"' ),
+    ),
+    array( 4, 4, 4, 4 ) );
+
+ck( 'the add form asks for the column, the words and one of the ten controls, and knows its group',
+    array(
+        substr_count( $list, 'name="wpcpm_column"' ),
+        substr_count( $list, 'id="wpcpm_add_label_' ),
+        substr_count( $list, '<select id="wpcpm_add_type_project" name="wpcpm_type">' ),
+        substr_count( $list, '<option value="team">Contribution team</option>' ),
+    ),
+    array( 4, 4, 1, 4 ) );
+
+ck( 'the list sits after the properties form, not inside it',
+    strpos( $list, '<div class="wpcpm-questions">' ) > strpos( $list, 'Save the track' ), true );
+
+// A refused Add lands here, on the track's own screen. What it carries belongs to the add form and
+// to nothing else: a question's label in the track's Name box was renaming the track on the next
+// press (the whole-branch review).
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array(
+	'form'  => $form,
+	'url'   => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder',
+	'flash' => array( 'status' => 'error', 'message' => 'This column belongs to the syncs.', 'question_values' => array( 'column' => 'Status', 'label' => 'Your "status"', 'type' => 'select', 'group' => 'project' ) ),
+) );
+$refused_add = ob_get_clean();
+
+ck( 'a refused Add leaves the track\'s name alone, fills its own group\'s boxes again encoded, and leaves the other groups\' empty',
+    array(
+        false !== strpos( $refused_add, 'id="wpcpm_label" name="wpcpm_label" value="Marketing Track"' ),
+        false !== strpos( $refused_add, 'id="wpcpm_add_column_project" name="wpcpm_column" value="Status"' ),
+        false !== strpos( $refused_add, 'id="wpcpm_add_label_project" name="wpcpm_label" value="Your &quot;status&quot;"' ),
+        substr_count( $refused_add, '<option value="select" selected="selected">One choice of several</option>' ),
+        false !== strpos( $refused_add, 'id="wpcpm_add_column_wrapup" name="wpcpm_column" value=""' ),
+        substr_count( $refused_add, 'selected="selected"' ),
+    ),
+    array( true, true, true, 1, true, 1 ) );
+
+// The lock reaches the row as well: a published question cannot fork, so its notice stops at who
+// shares the column (the whole-branch review, against decision 23).
+WPCPM_Track_Store::$tracks[13]['published'] = array( 'questions' => array( 'Slack name' => array() ) );
+$locked_form = WPCPM_Track_Builder::form( 13 );
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => $locked_form, 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$locked_list = ob_get_clean();
+WPCPM_Track_Store::$tracks[13]['published'] = null;
+
+ck( 'form() carries the published copy\'s columns, and a published question\'s row says who shares it and stops, while an unpublished one still offers the fork',
+    array(
+        $locked_form['locked'],
+        substr_count( $locked_list, 'Shared with 150-hour Track.' ),
+        substr_count( $locked_list, 'Shared with 150-hour Track. Rewording keeps the column' ),
+        substr_count( $list, 'Shared with 150-hour Track. Rewording keeps the column' ),
+    ),
+    array( array( 'Slack name' ), 2, 1, 2 ) );
+
+ck( 'and a track never published locks nothing',
+    WPCPM_Track_Builder::form( 13 )['locked'], array() );
+
+$read_only_form = WPCPM_Track_Builder::form( 11 );
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => $read_only_form, 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$read_only_list = ob_get_clean();
+
+ck( 'a built-in track still shows its questions, with nothing to press and no Add',
+    array(
+        substr_count( $read_only_list, 'class="wpcpm-question"' ),
+        substr_count( $read_only_list, 'Edit</a>' ),
+        substr_count( $read_only_list, 'wpcpm-question__mover' ),
+        substr_count( $read_only_list, 'wpcpm-questions__add' ),
+        false !== strpos( $read_only_list, 'cannot be edited here' ),
+    ),
+    array( 2, 0, 0, 0, true ) );
+
+$GLOBALS['enqueued'] = array();
+$tool->enqueue_assets( 'wpcredits-program_page_wpcpm-tool-track-builder' );
+
+ck( 'the screen enqueues its stylesheet and the editor script, the script in the footer',
+    $GLOBALS['enqueued'],
+    array( array( 'style', 'wpcpm-track-builder', array( 'wpcpm-admin' ) ), array( 'script', 'wpcpm-track-editor', array(), true ) ) );
+
+
+echo "\n=== One question on a screen of its own ===\n";
+
+WPCPM_Track_Store::$tracks = array(
+	13 => editable_track(),
+	11 => array(
+		'definition'  => array( 'key' => '150h', 'status' => 'In Sensei', 'label' => '150-hour Track', 'questions' => array( 'Hours' => array( 'type' => 'number', 'label' => 'Hours', 'group' => 'hours' ), 'Slack name' => array( 'type' => 'text', 'label' => 'Slack', 'group' => 'onboarding' ) ) ),
+		'state'       => 'published',
+		'source'      => 'builtin',
+		'log'         => array( array( 'at' => 1788000000, 'by' => 7, 'did' => 'publish' ) ),
+		'equivalence' => array(),
+		'published'   => array( 'key' => '150h' ),
+	),
+);
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Slack name - marketing'] = array( 'type' => 'textarea', 'label' => 'At length', 'group' => 'onboarding', 'mono' => true );
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Company ']               = array( 'type' => 'text', 'label' => 'Where you work', 'group' => 'onboarding' );
+
+$one = WPCPM_Track_Builder::question_form( 13, 'Slack name' );
+
+ck( 'question_form() gathers the question, who else writes its column, and that nothing locks it',
+    array( $one['track'], $one['label'], $one['key'], $one['column'], $one['question']['label'], array_column( $one['owners'], 'label' ), $one['forked_from'], $one['locked'], $one['read_only'] ),
+    array( 13, 'Marketing Track', 'marketing', 'Slack name', 'Your Slack name', array( '150-hour Track' ), '', false, false ) );
+
+ck( 'a fork names what it came from, and is shared with nobody',
+    array( WPCPM_Track_Builder::question_form( 13, 'Slack name - marketing' )['forked_from'], WPCPM_Track_Builder::question_form( 13, 'Slack name - marketing' )['owners'] ),
+    array( 'Slack name', array() ) );
+
+ck( 'a column with a trailing space is found exactly, and the trimmed name is not',
+    array( is_array( WPCPM_Track_Builder::question_form( 13, 'Company ' ) ), WPCPM_Track_Builder::question_form( 13, 'Company' ) ),
+    array( true, null ) );
+
+ck( 'a question that is not on the track, or a track that does not exist, is null',
+    array( WPCPM_Track_Builder::question_form( 13, 'Nothing' ), WPCPM_Track_Builder::question_form( 404, 'Hours' ) ),
+    array( null, null ) );
+
+WPCPM_Track_Store::$tracks[13]['published'] = array( 'questions' => array( 'Slack name' => array() ) );
+
+ck( 'a question in the published copy is locked, one added since is not',
+    array( WPCPM_Track_Builder::question_form( 13, 'Slack name' )['locked'], WPCPM_Track_Builder::question_form( 13, 'Your blog' )['locked'] ),
+    array( true, false ) );
+
+WPCPM_Track_Store::$tracks[13]['published'] = null;
+
+$_GET = array( 'wpcpm_track' => 13, 'wpcpm_question' => 'Slack name' );
+ob_start();
+$tool->render_admin_page();
+$routed = ob_get_clean();
+$_GET = array( 'wpcpm_track' => 13, 'wpcpm_question' => 'Nothing' );
+ob_start();
+$tool->render_admin_page();
+$fallen = ob_get_clean();
+$_GET = array();
+
+ck( 'the screen routes to the question the URL names, and falls back to the track when it names none it has',
+    array(
+        false !== strpos( $routed, 'class="wpcpm-question-form"' ), false === strpos( $routed, 'Save the track' ),
+        false === strpos( $fallen, 'class="wpcpm-question-form"' ), false !== strpos( $fallen, 'Save the track' ),
+    ),
+    array( true, true, true, true ) );
+
+/**
+ * Draw one question's screen.
+ *
+ * @param array $form  From `question_form()`.
+ * @param array $flash What the last press left.
+ * @return string
+ */
+function question_screen( $form, array $flash = array() ) {
+	ob_start();
+	WPCPM_Track_Editor_Screen::render_question( array( 'form' => $form, 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => $flash ) );
+
+	return ob_get_clean();
+}
+
+$screen = question_screen( WPCPM_Track_Builder::question_form( 13, 'Slack name' ) );
+
+ck( 'the way back names the track, and the form posts the save action for this question',
+    array(
+        false !== strpos( $screen, 'wpcpm_track=13">Back to Marketing Track</a>' ),
+        substr_count( $screen, 'name="_wpnonce" value="wpcpm_question_save"' ),
+        substr_count( $screen, 'name="action" value="wpcpm_question_save"' ),
+        substr_count( $screen, '<input type="hidden" name="track" value="13" />' ),
+        substr_count( $screen, '<input type="hidden" name="wpcpm_question" value="Slack name" />' ),
+    ),
+    array( true, 1, 1, 1, 1 ) );
+
+ck( 'the column is a box and the control a select with the current one chosen, and the sharing notice sits beside them',
+    array(
+        false !== strpos( $screen, 'id="wpcpm_column" name="wpcpm_column" value="Slack name"' ),
+        false !== strpos( $screen, '<option value="text" selected="selected">Text, one line</option>' ),
+        substr_count( $screen, 'selected="selected"' ),
+        false !== strpos( $screen, 'This column is shared with 150-hour Track.' ),
+    ),
+    array( true, true, 2, true ) );
+
+ck( 'every property a question has is a row: words, group with its own chosen, help, lead, subheading, note, row, three flags and the developer note',
+    array(
+        false !== strpos( $screen, 'id="wpcpm_label" name="wpcpm_label" value="Your Slack name"' ),
+        false !== strpos( $screen, '<option value="onboarding" selected="selected">Onboarding</option>' ),
+        substr_count( $screen, 'name="wpcpm_help"' ) + substr_count( $screen, 'name="wpcpm_lead"' ) + substr_count( $screen, 'name="wpcpm_subgroup"' ) + substr_count( $screen, 'name="wpcpm_note"' ) + substr_count( $screen, 'name="wpcpm_row"' ) + substr_count( $screen, 'name="wpcpm_why"' ),
+        substr_count( $screen, 'type="checkbox" id="wpcpm_stack"' ) + substr_count( $screen, 'type="checkbox" id="wpcpm_required"' ) + substr_count( $screen, 'type="checkbox" id="wpcpm_hide_from_institution"' ),
+        substr_count( $screen, 'checked="checked"' ),
+    ),
+    array( true, true, 6, 3, 0 ) );
+
+ck( 'a single-line text box offers its length limit and nothing another control owns',
+    array( substr_count( $screen, 'name="wpcpm_maxlength"' ), substr_count( $screen, 'name="wpcpm_min"' ), substr_count( $screen, 'name="wpcpm_options"' ), substr_count( $screen, 'id="wpcpm_mono"' ), false !== strpos( $screen, 'Save the question' ) ),
+    array( 1, 0, 0, 0, true ) );
+
+$number = question_screen( WPCPM_Track_Builder::question_form( 13, 'Hours' ) );
+
+ck( 'a number offers its bounds, filled from the question, and no length limit',
+    array(
+        false !== strpos( $number, 'id="wpcpm_min" name="wpcpm_min" value="0"' ),
+        false !== strpos( $number, 'id="wpcpm_max" name="wpcpm_max" value="1000"' ),
+        false !== strpos( $number, 'id="wpcpm_step" name="wpcpm_step" value="1"' ),
+        substr_count( $number, 'name="wpcpm_maxlength"' ),
+    ),
+    array( true, true, true, 0 ) );
+
+$mono = question_screen( WPCPM_Track_Builder::question_form( 13, 'Slack name - marketing' ) );
+
+ck( 'a text area offers monospace, ticked when set, and says what it forked from',
+    array( false !== strpos( $mono, 'type="checkbox" id="wpcpm_mono" name="wpcpm_mono" value="1" checked="checked"' ), false !== strpos( $mono, 'forked from Slack name.' ) ),
+    array( true, true ) );
+
+$typed = question_screen(
+	WPCPM_Track_Builder::question_form( 13, 'Your blog' ),
+	array( 'status' => 'error', 'message' => 'A select needs its choices.', 'question_values' => array( 'column' => 'Your blog', 'type' => 'select', 'label' => 'Your blog', 'group' => 'wrapup', 'options' => array( 'Yes', 'No & maybe' ) ) )
+);
+
+ck( 'after a refusal what was typed wins, box by box: the new control\'s rows are drawn, its choices one a line and encoded, the group as typed, and the refusal is shown',
+    array(
+        false !== strpos( $typed, '<option value="select" selected="selected">One choice of several</option>' ),
+        false !== strpos( $typed, "<textarea id=\"wpcpm_options\" name=\"wpcpm_options\" rows=\"6\" class=\"large-text code\">Yes\nNo &amp; maybe</textarea>" ),
+        false !== strpos( $typed, '<option value="wrapup" selected="selected">Wrap-up</option>' ),
+        false !== strpos( $typed, '<div class="notice notice-error is-dismissible"><p>A select needs its choices.</p></div>' ),
+    ),
+    array( true, true, true, true ) );
+
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Your blog']['help']     = 'The address';
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Your blog']['required'] = true;
+
+$cleared = question_screen(
+	WPCPM_Track_Builder::question_form( 13, 'Your blog' ),
+	array( 'status' => 'error', 'message' => 'A web address is not shaped like that.', 'question_values' => array( 'column' => 'Your blog', 'type' => 'url', 'label' => 'Your blog', 'group' => 'onboarding' ) )
+);
+
+ck( 'a refusal redraws a cleared box empty and an unticked flag unticked, rather than restoring what was stored',
+    array(
+        false !== strpos( $cleared, 'id="wpcpm_help" name="wpcpm_help" value=""' ),
+        substr_count( $cleared, 'id="wpcpm_required" name="wpcpm_required" value="1" checked="checked"' ),
+    ),
+    array( true, 0 ) );
+
+unset( WPCPM_Track_Store::$tracks[13]['definition']['questions']['Your blog']['help'] );
+unset( WPCPM_Track_Store::$tracks[13]['definition']['questions']['Your blog']['required'] );
+
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Personal email'] = array( 'type' => 'email', 'label' => 'An address of your own', 'group' => 'wrapup' );
+$email = question_screen( WPCPM_Track_Builder::question_form( 13, 'Personal email' ) );
+
+ck( 'an email question is always kept off the institution, so that box comes ticked',
+    false !== strpos( $email, 'id="wpcpm_hide_from_institution" name="wpcpm_hide_from_institution" value="1" checked="checked"' ), true );
+
+WPCPM_Track_Store::$tracks[13]['published'] = array( 'questions' => array( 'Slack name' => array() ) );
+$locked = question_screen( WPCPM_Track_Builder::question_form( 13, 'Slack name' ) );
+WPCPM_Track_Store::$tracks[13]['published'] = null;
+
+ck( 'a published question shows its column and control as text, posts them hidden, and says why they are fixed',
+    array(
+        substr_count( $locked, 'id="wpcpm_column"' ),
+        substr_count( $locked, '<select id="wpcpm_type"' ),
+        false !== strpos( $locked, '<input type="hidden" name="wpcpm_column" value="Slack name" />' ),
+        false !== strpos( $locked, '<input type="hidden" name="wpcpm_type" value="text" />' ),
+        false !== strpos( $locked, '<code>Slack name</code>' ),
+        false !== strpos( $locked, 'remove it and add a new question with a column of its own' ),
+        false !== strpos( $locked, 'id="wpcpm_label" name="wpcpm_label" value="Your Slack name"' ),
+    ),
+    array( 0, 0, true, true, true, true, true ) );
+
+// The notices take the lock's side: `handle_save()` refuses the fork this one used to offer
+// (decision 23, the whole-branch review), and the sentence at the top names the choices too.
+ck( 'a published shared question names the tracks that share its column and promises no fork, and its locked sentence names the choices',
+    array(
+        false !== strpos( $locked, 'its column, its control and its choices are fixed' ),
+        false !== strpos( $locked, 'This column is shared with 150-hour Track.' ),
+        false !== strpos( $locked, 'Changing the control or the choices gives this track a column of its own' ),
+    ),
+    array( true, true, false ) );
+
+ck( 'while an unpublished shared question still offers it',
+    array(
+        false !== strpos( $screen, 'Changing the control or the choices gives this track a column of its own' ),
+        false !== strpos( $screen, 'its column, its control and its choices are fixed' ),
+    ),
+    array( true, false ) );
+
+// A lock can be taken while this screen is open: publish the track in another tab, then save a
+// control change. What comes back is the control the question has (the Task 7 review).
+WPCPM_Track_Store::$tracks[13]['published'] = array( 'questions' => array( 'Slack name' => array() ) );
+$raced = question_screen(
+	WPCPM_Track_Builder::question_form( 13, 'Slack name' ),
+	array( 'status' => 'error', 'message' => 'This question has been published, so its control and its choices are fixed.', 'question_values' => array( 'column' => 'Slack name', 'type' => 'textarea', 'label' => 'Your Slack name', 'group' => 'onboarding' ) )
+);
+WPCPM_Track_Store::$tracks[13]['published'] = null;
+
+ck( 'a locked question posts and shows the control it has, not the one a refused press typed',
+    array(
+        false !== strpos( $raced, '<input type="hidden" name="wpcpm_type" value="text" />' ),
+        false !== strpos( $raced, '<strong>Control</strong> Text, one line</p>' ),
+        false !== strpos( $raced, 'Text, many lines' ),
+    ),
+    array( true, true, false ) );
+
+// The choices of a published select are fixed too, so the box is posted but not editable: an empty
+// list would be refused for having no choices, which is not what happened (the whole-branch review).
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Tool used'] = array( 'type' => 'select', 'label' => 'Which tool', 'group' => 'project', 'options' => array( 'MAAMP', 'Studio' ) );
+WPCPM_Track_Store::$tracks[13]['published']                           = array( 'questions' => array( 'Tool used' => array() ) );
+$locked_select = question_screen( WPCPM_Track_Builder::question_form( 13, 'Tool used' ) );
+WPCPM_Track_Store::$tracks[13]['published'] = null;
+$open_select = question_screen( WPCPM_Track_Builder::question_form( 13, 'Tool used' ) );
+unset( WPCPM_Track_Store::$tracks[13]['definition']['questions']['Tool used'] );
+
+ck( 'a published select still posts its choices, in a box that cannot be edited, and says why; an unpublished one is editable',
+    array(
+        false !== strpos( $locked_select, "<textarea id=\"wpcpm_options\" name=\"wpcpm_options\" rows=\"6\" class=\"large-text code\" readonly=\"readonly\">MAAMP\nStudio</textarea>" ),
+        false !== strpos( $locked_select, 'The choices are fixed: this question has been published.' ),
+        false !== strpos( $open_select, "<textarea id=\"wpcpm_options\" name=\"wpcpm_options\" rows=\"6\" class=\"large-text code\">MAAMP\nStudio</textarea>" ),
+        false !== strpos( $open_select, 'A column that already exists in Airtable must offer every one of these' ),
+    ),
+    array( true, true, true, true ) );
+
+$read_only = question_screen( WPCPM_Track_Builder::question_form( 11, 'Hours' ) );
+
+ck( 'a built-in track\'s question has no form at all, and points at Duplicate',
+    array( substr_count( $read_only, '<form' ), false !== strpos( $read_only, 'Duplicate the track to start one of your own' ) ),
+    array( 0, true ) );
+
+
+echo "\n=== Delete, on the list, for a track that was never published ===\n";
+
+WPCPM_Track_Store::$tracks = array(
+	21 => array(
+		// An apostrophe as well as the quotes: esc_js() escapes the one and encodes the other, and
+		// a label with only quotes cannot tell it from esc_attr() (the whole-branch review).
+		'definition'  => array( 'key' => 'never', 'status' => 'Never Track', 'label' => 'Sam\'s "Never" Track', 'course_url' => '', 'questions' => array() ),
+		'state'       => 'draft',
+		'source'      => 'definition',
+		'log'         => array(),
+		'equivalence' => array( 'not_builtin' ),
+		'published'   => null,
+	),
+	22 => array(
+		'definition'  => array( 'key' => 'once', 'status' => 'Once Track', 'label' => 'Once Track', 'course_url' => '', 'questions' => array() ),
+		'state'       => 'draft',
+		'source'      => 'definition',
+		'log'         => array( array( 'at' => 1788000000, 'by' => 7, 'did' => 'publish' ), array( 'at' => 1788100000, 'by' => 7, 'did' => 'unpublish' ) ),
+		'equivalence' => array( 'not_builtin' ),
+		'published'   => null,
+	),
+	23 => array(
+		'definition'  => array( 'key' => 'design', 'status' => 'Designer Track', 'label' => 'Designer Track', 'course_url' => '', 'questions' => array() ),
+		'state'       => 'draft',
+		'source'      => 'builtin',
+		'log'         => array(),
+		'equivalence' => array(),
+		'published'   => null,
+	),
+);
+WPCPM_Students_Sync::$counts = array();
+$GLOBALS['opts']['wpcpm_tracks_skipped'] = array();
+
+$delete_rows = WPCPM_Track_Builder::rows();
+
+ck( 'each row says whether the track was ever published, from its log rather than its state',
+    array_column( $delete_rows, 'ever_published' ), array( false, true, false ) );
+
+ob_start();
+WPCPM_Track_Builder_Screen::render_list( array( 'rows' => $delete_rows, 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$delete_list = ob_get_clean();
+
+ck( 'Delete is drawn once: for the draft never published, not for the one unpublished since, not for the built-in draft',
+    array(
+        substr_count( $delete_list, 'class="wpcpm-tracks__delete"' ),
+        substr_count( $delete_list, 'name="action" value="wpcpm_track_delete"' ),
+        substr_count( $delete_list, 'name="_wpnonce" value="wpcpm_track_delete"' ),
+        substr_count( $delete_list, '<input type="hidden" name="track" value="21" />' ),
+    ),
+    array( 1, 1, 1, 1 ) );
+
+ck( 'its confirmation names the track, encoded for the script it sits in, and says what deleting means',
+    false !== strpos( $delete_list, 'onsubmit="return confirm(\'Delete Sam\\\'s &quot;Never&quot; Track? It was never published, so nothing in Airtable or on the live site refers to it. This cannot be undone.\');"' ),
+    true );
+
+
+echo "\n=== The line above the list: what publishing would create, off the cached reading ===\n";
+
+WPCPM_Track_Store::$tracks = array( 13 => editable_track(), 11 => array(
+	'definition'  => array( 'key' => '150h', 'status' => 'In Sensei', 'label' => '150-hour Track', 'questions' => array( 'Hours' => array( 'type' => 'number', 'label' => 'Hours', 'group' => 'hours' ) ) ),
+	'state'       => 'published',
+	'source'      => 'builtin',
+	'log'         => array( array( 'at' => 1788000000, 'by' => 7, 'did' => 'publish' ) ),
+	'equivalence' => array(),
+	'published'   => array( 'key' => '150h' ),
+) );
+WPCPM_Track_Store::$tracks[13]['definition']['questions']['Main Contribution Team'] = array( 'type' => 'team', 'label' => 'Your team', 'group' => 'project' );
+
+/** The base as the cached reading holds it: two of the track's columns exist, one of the right type. */
+function cached_base( $age ) {
+	return array(
+		'age'    => $age,
+		'schema' => array(
+			'tblReports' => array(
+				'name'    => 'Students Reports',
+				'columns' => array(
+					'Hours'      => array( 'type' => 'number', 'options' => array() ),
+					'Slack name' => array( 'type' => 'singleLineText', 'options' => array() ),
+				),
+			),
+		),
+	);
+}
+
+WPCPM_Airtable::$cached = cached_base( 300 );
+WPCPM_Airtable::$asked  = 0;
+$line = WPCPM_Track_Builder::schema_line( WPCPM_Track_Store::$tracks[13]['definition'] );
+
+ck( 'the columns the base lacks are the ones publishing would create, judged by the class the preflight uses, and the reading\'s age travels with them',
+    $line, array( 'create' => array( 'Your blog' ), 'age' => 300 ) );
+
+ck( 'a column no control can create is not counted: the preflight refuses it rather than creating it',
+    in_array( 'Main Contribution Team', $line['create'], true ), false );
+
+ck( 'form() carries the reading for a track of somebody\'s own, and asks the client once',
+    array( WPCPM_Track_Builder::form( 13 )['schema'], WPCPM_Airtable::$asked ), array( $line, 2 ) );
+
+WPCPM_Airtable::$asked = 0;
+
+ck( 'and does not ask at all for a built-in track, whose columns all exist',
+    array( WPCPM_Track_Builder::form( 11 )['schema'], WPCPM_Airtable::$asked ), array( array(), 0 ) );
+
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => WPCPM_Track_Builder::form( 13 ), 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$aged = ob_get_clean();
+
+ck( 'the line says how many columns, how old the reading is, and that the publish screen reads afresh',
+    false !== strpos( $aged, '<p class="wpcpm-questions__schema">Publishing will create 1 column in Airtable. <span class="wpcpm-questions__age">Read from Airtable 5 minutes ago; the publish screen reads it afresh.</span></p>' ),
+    true );
+
+ck( 'and the row of that column says so, once, on the right row',
+    array( substr_count( $aged, 'Publishing will create this column in Airtable.' ), preg_match( '/data-wpcpm-column="Your blog"[^\n]*?Publishing will create this column/', $aged ) ),
+    array( 1, 1 ) );
+
+WPCPM_Airtable::$cached = cached_base( 12 );
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => WPCPM_Track_Builder::form( 13 ), 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$fresh_line = ob_get_clean();
+
+ck( 'a reading under a minute old was read just now',
+    false !== strpos( $fresh_line, 'Read from Airtable just now.' ), true );
+
+unset( WPCPM_Track_Store::$tracks[13]['definition']['questions']['Your blog'], WPCPM_Track_Store::$tracks[13]['definition']['questions']['Main Contribution Team'] );
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => WPCPM_Track_Builder::form( 13 ), 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$nothing_new = ob_get_clean();
+
+ck( 'a track whose columns all exist needs no new columns, and no row says otherwise',
+    array( false !== strpos( $nothing_new, 'This track needs no new Airtable columns.' ), substr_count( $nothing_new, 'Publishing will create this column' ) ),
+    array( true, 0 ) );
+
+WPCPM_Airtable::$cached = null;
+ob_start();
+WPCPM_Track_Builder_Screen::render_form( array( 'form' => WPCPM_Track_Builder::form( 13 ), 'url' => 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder', 'flash' => array() ) );
+$unread = ob_get_clean();
+
+ck( 'when the base cannot be read the line is left off rather than guessed, and the list is still drawn',
+    array( substr_count( $unread, 'wpcpm-questions__schema' ), substr_count( $unread, 'class="wpcpm-question"' ) ),
+    array( 0, 2 ) );
+
+
+echo "\n=== Unpublishing returns to the publish screen ===\n";
+
+WPCPM_Track_Store::$tracks   = array( 13 => editable_track() );
+WPCPM_Track_Publish::$answer = null;
+WPCPM_Track_Publish::$down   = array();
+$GLOBALS['can_manage']       = true;
+$GLOBALS['nonce']            = WPCPM_Track_Builder::ACTION_UNPUBLISH;
+$_POST                       = array( 'track' => 13 );
+WPCPM_Flash::$set            = array();
+$went = '';
+
+try {
+	$tool->handle_unpublish();
+} catch ( RedirectSignal $e ) {
+	$went = $e->getMessage();
+}
+
+ck( 'a track taken down comes back to its own publish screen, where the press came from, not to the list',
+    array( $went, WPCPM_Track_Publish::$down, WPCPM_Flash::$set['track-builder']['status'] ?? '' ),
+    array( 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder&wpcpm_publish=13', array( array( 13, 5 ) ), 'success' ) );
+
+WPCPM_Track_Publish::$answer = new WP_Error( 'wpcpm_track_in_use', 'Three students hold this status.' );
+$went = '';
+
+try {
+	$tool->handle_unpublish();
+} catch ( RedirectSignal $e ) {
+	$went = $e->getMessage();
+}
+
+WPCPM_Track_Publish::$answer = null;
+
+ck( 'and so does a refusal, with the reason',
+    array( $went, WPCPM_Flash::$set['track-builder']['message'] ?? '' ),
+    array( 'https://example.test/wp-admin/admin.php?page=wpcpm-tool-track-builder&wpcpm_publish=13', 'Three students hold this status.' ) );
 
 printf( "\n%s (%d checks)\n", $fail ? sprintf( '%d FAILURE(S)', $fail ) : 'ALL PASS', $total );
 exit( $fail ? 1 : 0 );

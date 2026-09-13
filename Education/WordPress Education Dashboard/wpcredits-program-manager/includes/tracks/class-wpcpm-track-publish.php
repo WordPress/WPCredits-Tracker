@@ -137,6 +137,14 @@ final class WPCPM_Track_Publish {
 			return self::answer( array( self::finding( 'no_definition', '', __( 'This track has no definition to publish.', 'wpcredits-program-manager' ) ) ), array() );
 		}
 
+		// Before the base is read: a trashed track is refused by the store at the end of the run,
+		// and a run that reached that refusal would already have created its columns. Nothing in
+		// the plugin trashes a track, so this answers a crafted request and nothing else (the
+		// design's decision 25, closing the finding T2c's whole-branch review parked).
+		if ( 'trash' === WPCPM_Track_Store::state( $post_id ) ) {
+			return self::answer( array( self::finding( 'track_trashed', '', __( 'This track is in the trash, so it cannot be published.', 'wpcredits-program-manager' ) ) ), array() );
+		}
+
 		// The store's own rules, asked once: a status or key another track holds, a column the
 		// syncs own. Its messages travel as they are, so the editor and this screen read the same.
 		foreach ( (array) WPCPM_Track_Store::check( $post_id, $definition ) as $error ) {
@@ -205,7 +213,11 @@ final class WPCPM_Track_Publish {
 				continue;
 			}
 
-			$refusals[] = self::finding( 'column_' . $verdict, $column, self::column_message( $verdict ) );
+			$missing = 'missing_choices' === $verdict
+				? WPCPM_Track_Columns::missing_choices( $column, isset( $definition['questions'][ $column ] ) ? (array) $definition['questions'][ $column ] : array(), $columns )
+				: array();
+
+			$refusals[] = self::finding( 'column_' . $verdict, $column, self::column_message( $verdict, $missing ) );
 		}
 
 		$now   = count( $columns );
@@ -695,7 +707,8 @@ final class WPCPM_Track_Publish {
 	 *
 	 * @param array $definition The track definition.
 	 * @param array $columns    The base table's columns, from the schema.
-	 * @return array Map of column names to verdict strings: `ok`, `create`, `computed`, `type_mismatch`, `foreign_link`.
+	 * @return array Map of column names to verdict strings: `ok`, `create`, `computed`, `type_mismatch`,
+	 *               `missing_choices`, `foreign_link`.
 	 */
 	private static function judge_columns( array $definition, array $columns ) {
 		$verdicts = array();
@@ -824,16 +837,25 @@ final class WPCPM_Track_Publish {
 	/**
 	 * Why a column already in the base cannot be used.
 	 *
-	 * @param string $verdict What `WPCPM_Track_Columns::judge()` said.
+	 * @param string   $verdict What `WPCPM_Track_Columns::judge()` said.
+	 * @param string[] $missing The options a single select does not offer, for that verdict alone.
 	 * @return string
 	 */
-	private static function column_message( $verdict ) {
+	private static function column_message( $verdict, array $missing = array() ) {
 		if ( 'computed' === $verdict ) {
 			return __( 'Airtable works this column out for itself, so nothing can be written to it: a student\'s answer would be thrown away.', 'wpcredits-program-manager' );
 		}
 
 		if ( 'foreign_link' === $verdict ) {
 			return __( 'This column links to another table, and a link carries a reverse column into it. Main Contribution Team is the one link a question may use.', 'wpcredits-program-manager' );
+		}
+
+		if ( 'missing_choices' === $verdict ) {
+			return sprintf(
+				/* translators: %s: a comma-separated list of the choices the Airtable column does not offer. */
+				__( 'The column in the base does not offer every choice this question does, and a student picking one of the missing ones would not save: %s. Airtable cannot add a choice through its API, so somebody adds them in the base and publishes again.', 'wpcredits-program-manager' ),
+				implode( ', ', $missing )
+			);
 		}
 
 		return __( 'The column in the base is a different type from the one this question needs, so the answer would arrive in the wrong shape.', 'wpcredits-program-manager' );

@@ -184,6 +184,51 @@ ck( 'the four computed columns of the real table are named as computed',
 ck( 'and its five other link columns are refused while Main Contribution Team is not among them',
     $foreign, array( 'Company ', 'Educational institution', 'Lessons', 'Mentor', 'Students' ) );
 
+echo "\n=== A single select must offer every choice the question does ===\n";
+
+/** One single select in the base, offering two of the three answers a question might want. */
+$choices = array(
+    'Course finished' => array(
+        'type'    => 'singleSelect',
+        'options' => array( 'choices' => array( array( 'name' => 'Yes' ), array( 'name' => 'No' ) ) ),
+    ),
+);
+
+ck( 'a select whose options the column all offers is ready',
+    WPCPM_Track_Columns::judge( 'Course finished', array( 'type' => 'select', 'options' => array( 'Yes', 'No' ) ), $choices ),
+    'ok' );
+
+ck( 'a select wanting one choice the column does not offer is refused',
+    WPCPM_Track_Columns::judge( 'Course finished', array( 'type' => 'select', 'options' => array( 'Yes', 'No', 'Not yet' ) ), $choices ),
+    'missing_choices' );
+
+ck( 'and the refusal can name it',
+    WPCPM_Track_Columns::missing_choices( 'Course finished', array( 'type' => 'select', 'options' => array( 'Yes', 'No', 'Not yet' ) ), $choices ),
+    array( 'Not yet' ) );
+
+ck( 'several missing choices are all named, in the order the question lists them',
+    WPCPM_Track_Columns::missing_choices( 'Course finished', array( 'type' => 'select', 'options' => array( 'Withdrew', 'Yes', 'Not yet' ) ), $choices ),
+    array( 'Withdrew', 'Not yet' ) );
+
+ck( 'the comparison is exact, so a choice differing only in case is missing',
+    WPCPM_Track_Columns::judge( 'Course finished', array( 'type' => 'select', 'options' => array( 'yes' ) ), $choices ),
+    'missing_choices' );
+
+ck( 'a select against a column that is not one is still a type mismatch, not a missing choice',
+    WPCPM_Track_Columns::judge( 'What you did', array( 'type' => 'select', 'options' => array( 'Yes' ) ), $columns ),
+    'type_mismatch' );
+
+ck( 'a select whose column is not in the base at all is created, choices and all',
+    array(
+        WPCPM_Track_Columns::judge( 'Brand new', array( 'type' => 'select', 'options' => array( 'Yes' ) ), $columns ),
+        WPCPM_Track_Columns::field( 'Brand new', array( 'type' => 'select', 'options' => array( 'Yes' ) ) ),
+    ),
+    array( 'create', array( 'name' => 'Brand new', 'type' => 'singleSelect', 'options' => array( 'choices' => array( array( 'name' => 'Yes' ) ) ) ) ) );
+
+ck( 'a control that is not a select never asks about choices',
+    WPCPM_Track_Columns::judge( 'Course finished', array( 'type' => 'text' ), $choices ),
+    'type_mismatch' );
+
 printf( "\n%s (%d checks)\n", $fails ? sprintf( '%d FAILURE(S)', $fails ) : 'ALL PASS', $total );
 
 exit( $fails ? 1 : 0 );

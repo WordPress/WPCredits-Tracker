@@ -67,6 +67,29 @@ class WPCPM_Request {
 	}
 
 	/**
+	 * A query argument kept exactly as given: unslashed, valid UTF-8, control characters dropped,
+	 * and never trimmed.
+	 *
+	 * For an Airtable column name naming the question being edited. A column name is the
+	 * question's key, verbatim, and an Airtable name can end in a space (the design's 4.2):
+	 * `text()` would trim it and the question would not be found. Safe because every caller
+	 * matches the value against the columns the track holds and prints it escaped.
+	 *
+	 * @param string $name     Query argument name.
+	 * @param string $fallback Value when the argument is absent.
+	 * @return string
+	 */
+	public static function exact( $name, $fallback = '' ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view state; see the class docblock.
+		if ( ! isset( $_GET[ $name ] ) || ! is_scalar( $_GET[ $name ] ) ) {
+			return $fallback;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- As above; cleaned below without touching the characters a name is made of.
+		return self::clean( wp_unslash( $_GET[ $name ] ) );
+	}
+
+	/**
 	 * A positive integer argument, such as a user ID being inspected.
 	 *
 	 * Returns 0 when absent or not a number, which every caller already treats as "no
@@ -241,9 +264,42 @@ class WPCPM_Request {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- As above; cleaned below without touching the characters a code is made of.
-		$value = wp_check_invalid_utf8( wp_unslash( $_POST[ $name ] ) );
+		return trim( self::clean( wp_unslash( $_POST[ $name ] ) ) );
+	}
 
-		return trim( (string) preg_replace( '/[^\P{C}\n\r\t]+/u', '', (string) $value ) );
+	/**
+	 * A posted value kept exactly as typed: the cleaning of posted_verbatim(), and no trim.
+	 *
+	 * For an Airtable column name. A question is keyed by its column name, verbatim, and an
+	 * Airtable name can end in a space (the design's 4.2): the base's own `Company ` does. Every
+	 * other reader here trims, and a column typed with its space would silently become a
+	 * different column. Safe for the same reason as posted_verbatim(): the value is matched
+	 * against what the site holds and escaped on output.
+	 *
+	 * @param string $name     Key in the posted fields.
+	 * @param string $fallback Fallback when the key is absent.
+	 * @return string
+	 */
+	public static function posted_exact( $name, $fallback = '' ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The caller's handler verifies the nonce before reaching here.
+		if ( ! isset( $_POST[ $name ] ) || ! is_scalar( $_POST[ $name ] ) ) {
+			return $fallback;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- As above; cleaned below without touching the characters a name is made of.
+		return self::clean( wp_unslash( $_POST[ $name ] ) );
+	}
+
+	/**
+	 * Valid UTF-8 with control characters dropped, and nothing else touched.
+	 *
+	 * @param mixed $value An unslashed scalar.
+	 * @return string
+	 */
+	private static function clean( $value ) {
+		$value = wp_check_invalid_utf8( (string) $value );
+
+		return (string) preg_replace( '/[^\P{C}\n\r\t]+/u', '', (string) $value );
 	}
 
 	/**

@@ -4,7 +4,7 @@ Tags: airtable, members, roles, education, wordpress-credits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.104.0
+Stable tag: 1.105.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -290,6 +290,16 @@ No. Uninstall removes settings, sync state, access-level meta and the custom rol
 4. The Program access control in the editor.
 
 == Changelog ==
+
+= 1.105.0 =
+
+* The Track Builder edits a track's questions. Under a track's properties its questions are listed by group; each is edited on a screen of its own, moved up or down within its group, or removed, and a question is added to a group with its Airtable column, its words and its control.
+* A question whose column another track also writes says so and names the track. Rewording keeps the column shared; changing its control or its choices gives this track a column of its own, named after the track, so the other tracks are not changed.
+* A question that has been published keeps its column and its control, because the column in Airtable holds what students have written, in that shape. Its wording can still change; to ask it differently, remove it and add a new question.
+* The line above the questions says how many columns publishing would create, from a reading of the base kept for fifteen minutes. The publish screen still reads the base afresh before anything is created.
+* A track that was never published can be deleted from the track list. One that has been published is kept as the record of what was created in Airtable, and can only be unpublished.
+* Publishing refuses a select question whose Airtable column does not offer every one of its choices, naming the missing ones, since Airtable's API cannot add a choice; and it refuses a track in the trash before reading the base.
+* Unpublishing a track returns to its publish screen rather than to the list.
 
 = 1.104.0 =
 

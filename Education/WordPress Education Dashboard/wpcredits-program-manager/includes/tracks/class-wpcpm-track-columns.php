@@ -116,7 +116,8 @@ final class WPCPM_Track_Columns {
 	 * @param array  $columns  The table's columns, keyed by name, each with a `type`, as
 	 *                         `WPCPM_Airtable::fetch_schema()` reports them.
 	 * @return string `create` when it is not there, `ok` when it is ready to be written to,
-	 *                `type_mismatch`, `computed`, or `foreign_link`.
+	 *                `type_mismatch`, `computed`, `foreign_link`, or `missing_choices` for a
+	 *                select the base does not offer every choice of.
 	 */
 	public static function judge( $column, array $question, array $columns ) {
 		$column = (string) $column;
@@ -146,7 +147,54 @@ final class WPCPM_Track_Columns {
 			return 'ok';
 		}
 
-		return self::TYPES[ $wanted ] === $type ? 'ok' : 'type_mismatch';
+		if ( self::TYPES[ $wanted ] !== $type ) {
+			return 'type_mismatch';
+		}
+
+		// A single select that already exists must offer every choice the question does. Airtable's
+		// update-field endpoint cannot add one, and the record write that could needs `typecast`,
+		// which 2.5 forbids (open item 1, settled 12 September 2026), so a missing choice is not
+		// something publishing can put right: the preflight refuses and a person adds it.
+		if ( 'select' === $wanted && array() !== self::missing_choices( $column, $question, $columns ) ) {
+			return 'missing_choices';
+		}
+
+		return 'ok';
+	}
+
+	/**
+	 * The options a select question has that the column in the base does not offer.
+	 *
+	 * Answered here rather than inside `judge()` so the refusal can name them: "a choice is
+	 * missing" is a message somebody has to go and investigate, and the list is the investigation.
+	 *
+	 * @param string $column   The column name.
+	 * @param array  $question The question.
+	 * @param array  $columns  The table's columns, as `WPCPM_Airtable::fetch_schema()` reports them.
+	 * @return string[] The absent options, in the order the question lists them.
+	 */
+	public static function missing_choices( $column, array $question, array $columns ) {
+		$choices = isset( $columns[ (string) $column ]['options']['choices'] )
+			? (array) $columns[ (string) $column ]['options']['choices']
+			: array();
+
+		$names = array();
+
+		foreach ( $choices as $choice ) {
+			if ( isset( $choice['name'] ) ) {
+				$names[] = (string) $choice['name'];
+			}
+		}
+
+		$missing = array();
+
+		foreach ( isset( $question['options'] ) ? (array) $question['options'] : array() as $option ) {
+			if ( ! in_array( (string) $option, $names, true ) ) {
+				$missing[] = (string) $option;
+			}
+		}
+
+		return $missing;
 	}
 
 	/**

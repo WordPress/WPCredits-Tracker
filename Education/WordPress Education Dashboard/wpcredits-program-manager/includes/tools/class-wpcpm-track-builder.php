@@ -135,6 +135,10 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 		add_action( 'admin_post_' . self::ACTION_TICK, array( $this, 'handle_tick' ) );
 		add_action( 'admin_post_' . self::ACTION_UNTICK, array( $this, 'handle_untick' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+
+		// The question editor's five handlers live in a class of their own, so this one stays the
+		// track's and the editor stays the questions' (the design's decision 22).
+		( new WPCPM_Track_Editor( $this ) )->boot();
 	}
 
 	/**
@@ -148,6 +152,10 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 		}
 
 		wp_enqueue_style( 'wpcpm-track-builder', WPCPM_PLUGIN_URL . 'assets/css/track-builder.css', array( 'wpcpm-admin' ), WPCPM_VERSION );
+
+		// The question list's arrows move a row in place and post in the background; without the
+		// script the same forms post the ordinary way (the design's section 6).
+		wp_enqueue_script( 'wpcpm-track-editor', WPCPM_PLUGIN_URL . 'assets/js/track-editor.js', array(), WPCPM_VERSION, true );
 	}
 
 	/**
@@ -181,20 +189,23 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 			$last      = self::last_publish( WPCPM_Track_Store::log_entries( $post_id ) );
 
 			$rows[] = array(
-				'id'           => $post_id,
-				'label'        => isset( $definition['label'] ) ? (string) $definition['label'] : '',
-				'status'       => $status,
-				'key'          => $key,
-				'course'       => isset( $definition['course_url'] ) ? (string) $definition['course_url'] : '',
-				'source'       => $source,
-				'state'        => WPCPM_Track_Store::state( $post_id ),
-				'students'     => WPCPM_Students_Sync::count_on_status( $status ),
-				'published_by' => (int) $last['by'],
-				'published_at' => (int) $last['at'],
-				'skipped'      => isset( $skipped[ $post_id ] ) ? (array) $skipped[ $post_id ] : array(),
-				'equivalence'  => WPCPM_Track_Store::equivalence( $post_id ),
-				'switched'     => WPCPM_Track_Store::switched( $post_id ),
-				'stale'        => 'builtin' === $source && ! is_array( $published ) && isset( $seeds[ $key ] ) && $seeds[ $key ] !== $definition,
+				'id'             => $post_id,
+				'label'          => isset( $definition['label'] ) ? (string) $definition['label'] : '',
+				'status'         => $status,
+				'key'            => $key,
+				'course'         => isset( $definition['course_url'] ) ? (string) $definition['course_url'] : '',
+				'source'         => $source,
+				'state'          => WPCPM_Track_Store::state( $post_id ),
+				'students'       => WPCPM_Students_Sync::count_on_status( $status ),
+				'published_by'   => (int) $last['by'],
+				'published_at'   => (int) $last['at'],
+				'skipped'        => isset( $skipped[ $post_id ] ) ? (array) $skipped[ $post_id ] : array(),
+				'equivalence'    => WPCPM_Track_Store::equivalence( $post_id ),
+				'switched'       => WPCPM_Track_Store::switched( $post_id ),
+				'stale'          => 'builtin' === $source && ! is_array( $published ) && isset( $seeds[ $key ] ) && $seeds[ $key ] !== $definition,
+				// From the log, not the state: an unpublished track is a draft again and is
+				// still the record of what was created in the base (decision 25).
+				'ever_published' => WPCPM_Track_Store::ever_published( $post_id ),
 			);
 		}
 
@@ -221,6 +232,8 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 		$post_id    = (int) $post_id;
 		$definition = WPCPM_Track_Store::get( $post_id );
 		$definition = is_array( $definition ) ? $definition : array();
+		$read_only  = 'builtin' === WPCPM_Track_Store::source( $post_id );
+		$published  = WPCPM_Track_Store::published( $post_id );
 
 		return array(
 			'id'              => $post_id,
@@ -231,7 +244,58 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 			'learn_course_id' => isset( $definition['learn_course_id'] ) ? (int) $definition['learn_course_id'] : '',
 			'hours_target'    => isset( $definition['hours_target'] ) ? (int) $definition['hours_target'] : '',
 			'hue'             => isset( $definition['hue'] ) ? (string) $definition['hue'] : '',
-			'read_only'       => 'builtin' === WPCPM_Track_Store::source( $post_id ),
+			'read_only'       => $read_only,
+			// The questions and every other track's columns, for the list under the properties
+			// (T3a): the sharing index is read once here, not once per row.
+			'questions'       => isset( $definition['questions'] ) && is_array( $definition['questions'] ) ? $definition['questions'] : array(),
+			'others'          => WPCPM_Track_Store::others( $post_id ),
+			// A built-in track's columns all exist, and its list offers nothing to press.
+			'schema'          => $read_only ? array() : self::schema_line( $definition ),
+			// The columns of the published copy: a row for one of these promises no fork, since
+			// that is the change `handle_save()` refuses (decision 23, the whole-branch review).
+			'locked'          => is_array( $published ) && isset( $published['questions'] ) && is_array( $published['questions'] ) ? array_map( 'strval', array_keys( $published['questions'] ) ) : array(),
+		);
+	}
+
+	/**
+	 * What publishing would create in the base, off the cached reading (decision 24).
+	 *
+	 * The same verdicts the preflight reaches, from the same class, on the reading the editor is
+	 * allowed to use: the line above the question list is advice, and the publish screen reads
+	 * the base afresh before anything is created. A column no control can create is left out of
+	 * the count, because the preflight refuses it rather than creating it, and a row that said
+	 * "publishing will create this" of it would be wrong.
+	 *
+	 * @param array $definition The track's definition.
+	 * @return array `create` (the columns) and `age` (seconds), or empty when the base could not
+	 *               be read, so the line is left off rather than guessed.
+	 */
+	public static function schema_line( array $definition ) {
+		$settings = WPCPM_Settings::get();
+		$reports  = isset( $settings['reports_table'] ) ? (string) $settings['reports_table'] : '';
+		$client   = new WPCPM_Airtable();
+		$held     = $client->cached_schema();
+
+		if ( is_wp_error( $held ) || '' === $reports || ! isset( $held['schema'][ $reports ]['columns'] ) || ! is_array( $held['schema'][ $reports ]['columns'] ) ) {
+			return array();
+		}
+
+		$columns   = $held['schema'][ $reports ]['columns'];
+		$questions = isset( $definition['questions'] ) && is_array( $definition['questions'] ) ? $definition['questions'] : array();
+		$create    = array();
+
+		foreach ( $questions as $column => $question ) {
+			$column   = (string) $column;
+			$question = is_array( $question ) ? $question : array();
+
+			if ( 'create' === WPCPM_Track_Columns::judge( $column, $question, $columns ) && null !== WPCPM_Track_Columns::field( $column, $question ) ) {
+				$create[] = $column;
+			}
+		}
+
+		return array(
+			'create' => $create,
+			'age'    => isset( $held['age'] ) ? (int) $held['age'] : 0,
 		);
 	}
 
@@ -259,7 +323,50 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 	}
 
 	/**
-	 * Render the screen: a copy being started, one track's properties, or the list.
+	 * One question, with everything its screen says about it.
+	 *
+	 * The sharing index, the fork it came from and the lock are read here, once, so the screen
+	 * prints facts and decides nothing: `WPCPM_Track_Questions` answers each of the three from the
+	 * same inputs the handler will use when Save is pressed.
+	 *
+	 * @param int    $post_id The track.
+	 * @param string $column  The question's column, exactly as the URL carries it.
+	 * @return array|null Null when the track or the question does not exist.
+	 */
+	public static function question_form( $post_id, $column ) {
+		$post_id    = (int) $post_id;
+		$column     = (string) $column;
+		$definition = WPCPM_Track_Store::get( $post_id );
+
+		if ( ! is_array( $definition ) ) {
+			return null;
+		}
+
+		$questions = isset( $definition['questions'] ) && is_array( $definition['questions'] ) ? $definition['questions'] : array();
+
+		if ( ! array_key_exists( $column, $questions ) || ! is_array( $questions[ $column ] ) ) {
+			return null;
+		}
+
+		$key       = isset( $definition['key'] ) ? (string) $definition['key'] : '';
+		$published = WPCPM_Track_Store::published( $post_id );
+		$others    = WPCPM_Track_Store::others( $post_id );
+
+		return array(
+			'track'       => $post_id,
+			'label'       => isset( $definition['label'] ) ? (string) $definition['label'] : '',
+			'key'         => $key,
+			'column'      => $column,
+			'question'    => $questions[ $column ],
+			'owners'      => WPCPM_Track_Questions::owners( $column, $others ),
+			'forked_from' => WPCPM_Track_Questions::forked_from( $column, $key, $others ),
+			'locked'      => WPCPM_Track_Questions::locked( $column, is_array( $published ) && isset( $published['questions'] ) && is_array( $published['questions'] ) ? $published['questions'] : array() ),
+			'read_only'   => 'builtin' === WPCPM_Track_Store::source( $post_id ),
+		);
+	}
+
+	/**
+	 * Render the screen: a copy being started, one question, one track's properties, or the list.
 	 */
 	public function render_admin_page() {
 		$this->require_manager();
@@ -306,6 +413,26 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 			echo '</div>';
 
 			return;
+		}
+
+		$question = WPCPM_Request::exact( 'wpcpm_question' );
+
+		if ( $track > 0 && '' !== $question ) {
+			$form = self::question_form( $track, $question );
+
+			if ( is_array( $form ) ) {
+				WPCPM_Track_Editor_Screen::render_question(
+					array(
+						'form'  => $form,
+						'url'   => $this->admin_url(),
+						'flash' => $flash,
+					)
+				);
+
+				echo '</div>';
+
+				return;
+			}
 		}
 
 		if ( $track > 0 && is_array( WPCPM_Track_Store::get( $track ) ) ) {
@@ -532,14 +659,16 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 	 *
 	 * @param int|WP_Error $result  What the store answered.
 	 * @param string       $message What to say when it worked.
+	 * @param array        $args    Query arguments naming the screen to come back to; none for the list.
 	 */
-	private function report( $result, $message ) {
+	private function report( $result, $message, array $args = array() ) {
 		if ( is_wp_error( $result ) ) {
 			$this->redirect_back(
 				array(
 					'status'  => 'error',
 					'message' => $result->get_error_message(),
-				)
+				),
+				$args
 			);
 		}
 
@@ -547,7 +676,8 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 			array(
 				'status'  => 'success',
 				'message' => $message,
-			)
+			),
+			$args
 		);
 	}
 
@@ -644,9 +774,12 @@ class WPCPM_Track_Builder extends WPCPM_Tool {
 
 		$track = WPCPM_Request::posted_id( 'track' );
 
+		// Back to the track's own publish screen, where the press came from, rather than the list:
+		// the screen shows the state the press changed (T2c's Task 9 review, its L3).
 		$this->report(
 			WPCPM_Track_Publish::take_down( $track, get_current_user_id() ),
-			__( 'The track is a draft again. Nothing was changed in Airtable, and its status is still in "Currently mentoring".', 'wpcredits-program-manager' )
+			__( 'The track is a draft again. Nothing was changed in Airtable, and its status is still in "Currently mentoring".', 'wpcredits-program-manager' ),
+			array( 'wpcpm_publish' => $track )
 		);
 	}
 

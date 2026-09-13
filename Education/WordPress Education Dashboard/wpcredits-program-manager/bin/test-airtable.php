@@ -50,6 +50,8 @@ function add_query_arg( $args, $url ) { return $url . ( false === strpos( $url, 
 function get_option( $k, $d = false ) { return array_key_exists( $k, $GLOBALS['opts'] ) ? $GLOBALS['opts'][ $k ] : $d; }
 function update_option( $k, $v, $a = null ) { $GLOBALS['opts'][ $k ] = $v; return true; }
 function delete_option( $k ) { unset( $GLOBALS['opts'][ $k ] ); return true; }
+function get_transient( $k ) { return array_key_exists( $k, $GLOBALS['transients'] ) ? $GLOBALS['transients'][ $k ] : false; }
+function set_transient( $k, $v, $ttl = 0 ) { $GLOBALS['transients'][ $k ] = $v; $GLOBALS['ttl'][ $k ] = $ttl; return true; }
 function wp_doing_cron() { return ! empty( $GLOBALS['doing_cron'] ); }
 
 /**
@@ -118,6 +120,8 @@ function fresh( $mode = 'web' ) {
 	$GLOBALS['mode']  = $mode;
 	$GLOBALS['now']   = 1700000000.0;
 	$GLOBALS['opts']  = array();
+	$GLOBALS['transients'] = array();
+	$GLOBALS['ttl']   = array();
 	$GLOBALS['queue'] = array();
 	$GLOBALS['sent']  = array();
 	$GLOBALS['slept'] = array();
@@ -645,6 +649,49 @@ ck( 'and the types arrive beside them, with a select carrying its choices',
 		'Name'      => array( 'type' => 'singleLineText', 'options' => array() ),
 		'Tool used' => array( 'type' => 'singleSelect', 'options' => array( 'choices' => array( array( 'name' => 'MAAMP' ) ) ) ),
 	) );
+
+echo "\n=== The last schema read is kept for the track editor ===\n";
+
+// The read above filled the transient: the copy is the schema, held for fifteen minutes.
+ck( 'a successful read is kept, schema and all, for fifteen minutes',
+	array( $GLOBALS['transients'][ WPCPM_Airtable::SCHEMA_TRANSIENT ]['schema'] === $schema, $GLOBALS['ttl'][ WPCPM_Airtable::SCHEMA_TRANSIENT ] ),
+	array( true, 900 ) );
+
+$held = $airtable->cached_schema();
+
+ck( 'the editor reads the held copy and no request is made',
+	array( $held['schema'] === $schema, $held['age'] < 5, sent() ),
+	array( true, true, 1 ) );
+
+$GLOBALS['transients'][ WPCPM_Airtable::SCHEMA_TRANSIENT ]['read'] = time() - 300;
+
+ck( 'and says how old it is',
+	$airtable->cached_schema()['age'] >= 300, true );
+
+$GLOBALS['transients'] = array();
+queue( response( 200, array( 'tables' => array( array( 'id' => 'tblY', 'name' => 'Other', 'fields' => array() ) ) ) ) );
+$fresh_read = $airtable->cached_schema();
+
+ck( 'with nothing held it reads the base, and that read is age zero',
+	array( array_keys( $fresh_read['schema'] ), $fresh_read['age'], sent() ),
+	array( array( 'tblY' ), 0, 2 ) );
+
+$GLOBALS['transients'] = array();
+queue( response( 500, array( 'error' => 'boom' ) ) );
+
+ck( 'with nothing held and the base unreadable, the error comes back and nothing is kept',
+	array( is_wp_error( $airtable->cached_schema() ), $GLOBALS['transients'] ),
+	array( true, array() ) );
+
+// The held copy is seeded first: fresh() empties the store, so a check run straight after it only
+// proved an empty store stays empty (the whole-branch review).
+fresh( 'web' );
+$GLOBALS['transients'][ WPCPM_Airtable::SCHEMA_TRANSIENT ] = array( 'read' => time() - 100, 'schema' => array( 'tblZ' => array() ) );
+queue( response( 500, array( 'error' => 'boom' ) ) );
+$airtable->fetch_schema();
+
+ck( 'a failed read leaves the held copy alone',
+	$GLOBALS['transients'][ WPCPM_Airtable::SCHEMA_TRANSIENT ]['schema'], array( 'tblZ' => array() ) );
 
 echo "\n" . ( $fail ? "$fail FAILURE(S)\n" : "ALL PASS\n" );
 

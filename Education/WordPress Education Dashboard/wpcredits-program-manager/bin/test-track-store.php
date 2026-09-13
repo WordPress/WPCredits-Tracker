@@ -780,6 +780,77 @@ ck( 'but it still has the required fields',
     array( true, true, true ) );
 
 
+echo "\n=== Every other track, for the question editor's sharing index ===\n";
+
+$GLOBALS['posts'] = array();
+$GLOBALS['pmeta'] = array();
+$GLOBALS['opts']  = array();
+
+$shared_a = WPCPM_Track_Store::create( track( 'Sharing A', 'share-a' ) );
+$shared_b = WPCPM_Track_Store::create( track( 'Sharing B', 'share-b' ) );
+$shared_c = WPCPM_Track_Store::create( track( 'Sharing C', 'share-c' ) );
+WPCPM_Track_Store::publish( $shared_b );
+update_post_meta( $shared_c, WPCPM_Track_Store::META_SOURCE, 'builtin' );
+
+// An Airtable name can end in a space (the Global Constraints' own `Company `), so Sharing B
+// gets a question keyed with a trailing space, to prove a column name travels verbatim.
+$shared_b_definition                          = track( 'Sharing B', 'share-b' );
+$shared_b_definition['questions']['Company '] = array( 'label' => 'Where you work', 'type' => 'text', 'group' => 'onboarding' );
+WPCPM_Track_Store::save( $shared_b, $shared_b_definition );
+
+$others = WPCPM_Track_Store::others( $shared_a );
+
+ck( 'every track but the one asking, oldest first, with its label and its columns',
+    array_map( function ( $o ) { return array( $o['label'], $o['columns'] ); }, $others ),
+    array(
+        array( 'Sharing B', array( 'Hours', 'share-b notes', 'Company ' ) ),
+        array( 'Sharing C', array( 'Hours', 'share-c notes' ) ),
+    ) );
+
+ck( 'a published track and a built-in one both write their columns; a draft does not yet',
+    array( array_column( $others, 'published' ), array_column( WPCPM_Track_Store::others( $shared_b ), 'published' ) ),
+    array( array( true, true ), array( false, true ) ) );
+
+ck( 'a column name travels verbatim, so a trailing space is kept',
+    array( in_array( 'Company ', $others[0]['columns'], true ), in_array( 'Company', $others[0]['columns'], true ) ),
+    array( true, false ) );
+
+echo "\n=== A track that was never published can be deleted ===\n";
+
+ck( 'a draft that has never been published has no publish in its log',
+    WPCPM_Track_Store::ever_published( $shared_a ), false );
+
+ck( 'a published track has',
+    WPCPM_Track_Store::ever_published( $shared_b ), true );
+
+WPCPM_Track_Store::unpublish( $shared_b );
+
+ck( 'and unpublishing does not take that back: the log is the record',
+    array( WPCPM_Track_Store::state( $shared_b ), WPCPM_Track_Store::ever_published( $shared_b ) ),
+    array( 'draft', true ) );
+
+$refused = WPCPM_Track_Store::delete( $shared_b );
+
+ck( 'so a track that was ever published is refused, and kept',
+    array( $refused->get_error_code(), null !== get_post( $shared_b ) ),
+    array( 'wpcpm_track_was_published', true ) );
+
+ck( 'a built-in track is refused as well',
+    WPCPM_Track_Store::delete( $shared_c )->get_error_code(), 'wpcpm_track_builtin' );
+
+ck( 'a track that does not exist is refused',
+    WPCPM_Track_Store::delete( 987654 )->get_error_code(), 'wpcpm_track_missing' );
+
+$GLOBALS['opts'][ WPCPM_Tracks::OPT_FIELDS_PREFIX . 'share-a' ] = array( 'left by a compile that never finished' );
+
+ck( 'a never-published draft is deleted, its post and its stray form option with it',
+    array( WPCPM_Track_Store::delete( $shared_a ), get_post( $shared_a ), array_key_exists( WPCPM_Tracks::OPT_FIELDS_PREFIX . 'share-a', $GLOBALS['opts'] ) ),
+    array( $shared_a, null, false ) );
+
+ck( 'and the other tracks are untouched',
+    array( null !== get_post( $shared_b ), null !== get_post( $shared_c ) ), array( true, true ) );
+
+
 printf( "\n%s (%d checks)\n", $fails ? sprintf( '%d FAILED', $fails ) : 'ALL PASS', $total );
 
 exit( $fails ? 1 : 0 );

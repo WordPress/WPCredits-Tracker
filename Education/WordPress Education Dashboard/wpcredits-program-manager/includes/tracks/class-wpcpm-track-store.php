@@ -1071,6 +1071,105 @@ final class WPCPM_Track_Store {
 	}
 
 	/**
+	 * Every other track, as the question editor's sharing index takes them.
+	 *
+	 * A column is shared when another track holds the same name, verbatim, whatever side of the
+	 * switch that track is on: a built-in track's definition is its PHP's output, so its columns
+	 * are the ones its form writes (the design's 5). A draft that was never published is named
+	 * too, marked as one, because it does not write the column yet but will.
+	 *
+	 * @param int $post_id The track whose editor is asking, left out of the answer.
+	 * @return array[] Each `label`, `published` and `columns`, oldest track first.
+	 */
+	public static function others( $post_id ) {
+		$post_id = (int) $post_id;
+		$others  = array();
+
+		foreach ( self::all_ids() as $id ) {
+			$id = (int) $id;
+
+			if ( $id === $post_id ) {
+				continue;
+			}
+
+			$definition = self::get( $id );
+
+			if ( ! is_array( $definition ) ) {
+				continue;
+			}
+
+			$state = self::state( $id );
+
+			$others[] = array(
+				'label'     => isset( $definition['label'] ) ? (string) $definition['label'] : '',
+				'published' => 'published' === $state || 'changed' === $state || 'builtin' === self::source( $id ),
+				'columns'   => isset( $definition['questions'] ) && is_array( $definition['questions'] ) ? array_map( 'strval', array_keys( $definition['questions'] ) ) : array(),
+			);
+		}
+
+		return $others;
+	}
+
+	/**
+	 * Whether a track has ever been published, from its log.
+	 *
+	 * The log rather than the published copy or the post status: unpublishing sets the status
+	 * back to draft and the log is the one record that survives it (the design's decision 25).
+	 *
+	 * @param int $post_id The track.
+	 * @return bool
+	 */
+	public static function ever_published( $post_id ) {
+		foreach ( self::log_entries( $post_id ) as $entry ) {
+			if ( is_array( $entry ) && isset( $entry['did'] ) && 'publish' === $entry['did'] ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Delete a track that was never published.
+	 *
+	 * Decision 9 keeps every track that was ever published, because it is the record of what was
+	 * created in the base. A draft that never was created no column, holds no student's status
+	 * and was never compiled, so nothing else has to change: `compile()` reads published posts
+	 * only, and the form option it would have written was never written (decision 25). The
+	 * option is deleted all the same, in case a compile that never finished left one.
+	 *
+	 * @param int $post_id The track.
+	 * @return int|WP_Error The post ID, or why it was refused.
+	 */
+	public static function delete( $post_id ) {
+		$post_id = (int) $post_id;
+
+		if ( null === self::track_post( $post_id ) ) {
+			return new WP_Error( 'wpcpm_track_missing', __( 'That track does not exist.', 'wpcredits-program-manager' ) );
+		}
+
+		if ( 'builtin' === self::source( $post_id ) ) {
+			return new WP_Error( 'wpcpm_track_builtin', __( 'A built-in track cannot be deleted: it is the record of a form the program runs.', 'wpcredits-program-manager' ) );
+		}
+
+		if ( self::ever_published( $post_id ) ) {
+			return new WP_Error( 'wpcpm_track_was_published', __( 'This track has been published, so it is kept as the record of what was created in Airtable. It can be unpublished, not deleted.', 'wpcredits-program-manager' ) );
+		}
+
+		$definition = self::get( $post_id );
+
+		if ( is_array( $definition ) && ! empty( $definition['key'] ) ) {
+			delete_option( WPCPM_Tracks::OPT_FIELDS_PREFIX . $definition['key'] );
+		}
+
+		if ( ! wp_delete_post( $post_id, true ) ) {
+			return new WP_Error( 'wpcpm_track_not_deleted', __( 'WordPress could not delete that track.', 'wpcredits-program-manager' ) );
+		}
+
+		return $post_id;
+	}
+
+	/**
 	 * Every track's post ID, whatever its status, trash included.
 	 *
 	 * @return int[]

@@ -150,6 +150,38 @@ final class WPCPM_Track_Builder_Screen {
 		if ( ! empty( $row['switched'] ) ) {
 			self::render_button( WPCPM_Track_Builder::ACTION_SWITCH_BUILTIN, (int) $row['id'], __( 'Run from its hand-written form', 'wpcredits-program-manager' ) );
 		}
+
+		// Delete is offered on a track that was never published and is not built in (decision 25).
+		// Every other track is the record of what was created in the base, and the store refuses
+		// it, so the button is not drawn where it could only fail.
+		if ( 'builtin' !== $row['source'] && empty( $row['ever_published'] ) ) {
+			self::render_delete( (int) $row['id'], (string) $row['label'] );
+		}
+	}
+
+	/**
+	 * Delete, behind a confirmation that names the track (decision 25).
+	 *
+	 * @param int    $track The track.
+	 * @param string $label Its name.
+	 */
+	private static function render_delete( $track, $label ) {
+		$confirm = sprintf(
+			/* translators: %s: the track's name. */
+			__( 'Delete %s? It was never published, so nothing in Airtable or on the live site refers to it. This cannot be undone.', 'wpcredits-program-manager' ),
+			$label
+		);
+
+		printf(
+			'<form method="post" action="%1$s" class="wpcpm-tracks__delete" onsubmit="return confirm(\'%2$s\');">',
+			esc_url( admin_url( 'admin-post.php' ) ),
+			esc_js( $confirm )
+		);
+		wp_nonce_field( WPCPM_Track_Editor::ACTION_DELETE );
+		echo '<input type="hidden" name="action" value="' . esc_attr( WPCPM_Track_Editor::ACTION_DELETE ) . '" />';
+		printf( '<input type="hidden" name="track" value="%d" />', (int) $track );
+		printf( '<button type="submit" class="button button-link-delete">%s</button>', esc_html__( 'Delete', 'wpcredits-program-manager' ) );
+		echo '</form>';
 	}
 
 	/**
@@ -507,13 +539,17 @@ final class WPCPM_Track_Builder_Screen {
 	 *
 	 * @param array $args `form` from `WPCPM_Track_Builder::form()`, the screen's `url`, and the
 	 *                    `flash` the last press left, whose `values` win over the stored ones so a
-	 *                    refusal never makes somebody type their change again.
+	 *                    refusal never makes somebody type their change again. A refused Add or
+	 *                    Save of a question flashes `question_values` instead, which belong to the
+	 *                    add form below and never to the track's own properties (the whole-branch
+	 *                    review).
 	 */
 	public static function render_form( array $args ) {
-		$form  = isset( $args['form'] ) && is_array( $args['form'] ) ? $args['form'] : array();
-		$url   = isset( $args['url'] ) ? (string) $args['url'] : '';
-		$flash = isset( $args['flash'] ) && is_array( $args['flash'] ) ? $args['flash'] : array();
-		$typed = isset( $flash['values'] ) && is_array( $flash['values'] ) ? $flash['values'] : array();
+		$form            = isset( $args['form'] ) && is_array( $args['form'] ) ? $args['form'] : array();
+		$url             = isset( $args['url'] ) ? (string) $args['url'] : '';
+		$flash           = isset( $args['flash'] ) && is_array( $args['flash'] ) ? $args['flash'] : array();
+		$typed           = isset( $flash['values'] ) && is_array( $flash['values'] ) ? $flash['values'] : array();
+		$question_values = isset( $flash['question_values'] ) && is_array( $flash['question_values'] ) ? $flash['question_values'] : array();
 
 		self::render_notice( $flash );
 
@@ -521,6 +557,9 @@ final class WPCPM_Track_Builder_Screen {
 
 		if ( ! empty( $form['read_only'] ) ) {
 			echo '<p class="wpcpm-tracks__readonly">' . esc_html__( 'This track runs from its hand-written form, so it cannot be edited here. Duplicate it to start a track of your own, or switch it to its definition first.', 'wpcredits-program-manager' ) . '</p>';
+
+			// The questions are still shown, with nothing to press: what a duplicate would copy.
+			self::render_questions( $form, $url, $question_values );
 
 			return;
 		}
@@ -555,6 +594,31 @@ final class WPCPM_Track_Builder_Screen {
 
 		printf( '<p class="submit"><button type="submit" class="button button-primary">%s</button></p>', esc_html__( 'Save the track', 'wpcredits-program-manager' ) );
 		echo '</form>';
+
+		self::render_questions( $form, $url, $question_values );
+	}
+
+	/**
+	 * The question list under the properties, drawn by the editor's own screen class.
+	 *
+	 * @param array  $form  The track as `WPCPM_Track_Builder::form()` gives it.
+	 * @param string $url   The screen's URL.
+	 * @param array  $typed What a refused Add carried, for the add form to draw again.
+	 */
+	private static function render_questions( array $form, $url, array $typed = array() ) {
+		WPCPM_Track_Editor_Screen::render_questions(
+			array(
+				'track'     => isset( $form['id'] ) ? (int) $form['id'] : 0,
+				'key'       => isset( $form['key'] ) ? (string) $form['key'] : '',
+				'questions' => isset( $form['questions'] ) && is_array( $form['questions'] ) ? $form['questions'] : array(),
+				'others'    => isset( $form['others'] ) && is_array( $form['others'] ) ? $form['others'] : array(),
+				'schema'    => isset( $form['schema'] ) && is_array( $form['schema'] ) ? $form['schema'] : array(),
+				'locked'    => isset( $form['locked'] ) && is_array( $form['locked'] ) ? $form['locked'] : array(),
+				'typed'     => $typed,
+				'url'       => $url,
+				'read_only' => ! empty( $form['read_only'] ),
+			)
+		);
 	}
 
 	/**

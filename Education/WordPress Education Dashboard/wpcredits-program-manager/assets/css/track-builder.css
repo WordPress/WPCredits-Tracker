@@ -85,3 +85,72 @@
 	display: inline-block;
 	margin: 2px 0;
 }
+
+/* The question editor (T3a). The list is core's own table shape, one table a group, so only what
+   the rows add is styled: the column name beside the words, the notice under them, and the arrows. */
+.wpcpm-questions__group {
+	margin-top: 24px;
+}
+
+/* The group's own heading, an h3 under the list's h2 (the whole-branch review: this rule said h2
+   and matched nothing). */
+.wpcpm-questions__group h3 {
+	margin-bottom: 8px;
+}
+
+/* The column name is what Airtable calls the question; set as code, and with its spaces kept, so a
+   trailing space or an odd capital reads as deliberate rather than as a typo in the words beside
+   it. A column name may end in a space (4.2), and `pre-wrap` is what makes that one visible (the
+   whole-branch review). */
+.wpcpm-question__column {
+	display: block;
+	margin-top: 4px;
+	white-space: pre-wrap;
+}
+
+/* A question's notice - shared with the tracks it names, forked from a column, or a column
+   publishing will create - is context under the row's words, not a warning: the same muted
+   treatment the track list gives its equivalence line. */
+.wpcpm-question__notice {
+	display: block;
+	margin-top: 4px;
+	color: #50575e;
+	font-size: 12px;
+}
+
+/* The two arrows and Remove sit together on the right, the way the Student Report Card's module
+   arrows do; the mover is a form, so it is inline to keep them on one line. */
+.wpcpm-question__mover,
+.wpcpm-question__remover {
+	display: inline-block;
+	margin: 0 4px 0 0;
+}
+
+/* The add form is one row of inputs under its group's table, aligned to the table's left edge. */
+.wpcpm-questions__add {
+	margin: 8px 0 0;
+}
+
+.wpcpm-questions__add label {
+	margin-right: 8px;
+}
+
+/* The schema line stands above the whole list: a sentence, and the age of the reading after it in
+   the same muted color as a notice. */
+.wpcpm-questions__schema {
+	margin: 16px 0 0;
+}
+
+.wpcpm-questions__age {
+	color: #50575e;
+}
+
+/* On the question's own screen, the column and the control sit above the properties table, and a
+   locked column is drawn as text rather than a box so the lock is visible before a save refuses it. */
+.wpcpm-question__identity {
+	margin-bottom: 16px;
+}
+
+.wpcpm-question__locked {
+	color: #50575e;
+}
